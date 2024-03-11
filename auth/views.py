@@ -5,7 +5,8 @@ from rest_framework.views import APIView
 from django.contrib.auth.models import User
 from .serializers import UserSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
-
+from django.urls import reverse
+from django.shortcuts import redirect
 
 class RegisterView(APIView):
     template_name = 'register.html'
@@ -40,13 +41,17 @@ class LoginView(APIView):
                 user = User.objects.get(username=username)
                 if user.check_password(password):
                     refresh = RefreshToken.for_user(user)
-                    return Response({
-                        'refresh': str(refresh),
-                        'access': str(refresh.access_token),
-                    }, status=status.HTTP_200_OK)
+
+                    
+                    # Get the URL for the dashboard
+                    dashboard_url = reverse('dashboard')
+                
+                    # Return a redirect response to the dashboard
+                    return redirect(dashboard_url)
                 else:
                     return Response({'error': 'Invalid username or password'}, status=status.HTTP_401_UNAUTHORIZED)
             except User.DoesNotExist:
                 return Response({'error': 'User does not exist'}, status=status.HTTP_401_UNAUTHORIZED)
         else:
             return Response({'error': 'Username and password are required'}, status=status.HTTP_400_BAD_REQUEST)
+        

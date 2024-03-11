@@ -13,6 +13,13 @@ services:
       - POSTGRES_USER=halkiestalkies_user
       - POSTGRES_PASSWORD=halkiestalkies_pass
       - POSTGRES_PORT=5434
+
+  redis:
+    image: redis:latest
+    container_name: chat_redis
+    ports:
+      - "6380:6379"
+
   web:
     container_name: chat_app
     build: 
@@ -22,4 +29,4 @@ services:
     volumes:
       - .:/app
     ports:
-      - "8001:8001"
+      - "8001:8000"

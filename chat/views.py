@@ -1,3 +1,15 @@
 from django.shortcuts import render
+from django.contrib.auth.models import User
+from django.views import View
+from django.shortcuts import redirect
 
-# Create your views here.
+
+class NewRoomView(View):
+    def get(self, request):
+        users = User.objects.all()
+        context = {'users': users}
+        return render(request, 'chat.html', context)
+
+    def post(self, request):
+        selected_user_id = request.POST.get('recipient')
+        return redirect('chat')

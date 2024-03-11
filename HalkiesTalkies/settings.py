@@ -22,7 +22,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = get_random_secret_key()
+SECRET_KEY = 'django-insecure-v^p!)_*!_^#!6#qa@9lqa_w%y8w$wnxn+$r%8+f2s=hh_qx^%('
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -40,8 +40,31 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'chat',
     'rest_framework',
+    'channels',
+    'channels_redis',
 ]
+
+from django.middleware.csrf import CsrfViewMiddleware
+from django.utils.functional import SimpleLazyObject
+from django.conf import settings
+
+class ExcludeWebSocketFromCSRFMiddleware(CsrfViewMiddleware):
+    def _accepts_websocket(self, request):
+        return request.META.get('HTTP_CONNECTION', '').lower() == 'upgrade' and \
+               request.META.get('HTTP_UPGRADE', '').lower() == 'websocket'
+
+    def process_view(self, request, callback, callback_args, callback_kwargs):
+        if self._accepts_websocket(request):
+            # Skip CSRF check for WebSocket connections
+            return None
+        return super().process_view(request, callback, callback_args, callback_kwargs)
+
+def get_websocket_path():
+    return WEBSOCKET_URL_PREFIX  # Customize this if needed
+
+websocket_path = SimpleLazyObject(get_websocket_path)
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -54,6 +77,9 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'HalkiesTalkies.urls'
+
+WEBSOCKET_URL_PREFIX = '/ws/'
+
 
 TEMPLATES = [
     {
@@ -72,7 +98,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'HalkiesTalkies.wsgi.application'
-
+ASGI_APPLICATION = 'HalkiesTalkies.asgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
@@ -150,4 +176,15 @@ SIMPLE_JWT = {
     'AUTH_HEADER_NAME': 'HTTP_AUTHORIZATION',
     'USER_ID_FIELD': 'username',
     'USER_ID_CLAIM': 'user_id',
+}
+
+
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("localhost", 6380)],
+        },
+    },
 }

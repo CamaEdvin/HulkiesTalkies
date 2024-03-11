@@ -3,33 +3,195 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}My Chat App{% endblock %}</title>
-    <!-- Include Bootstrap CSS -->
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Include custom CSS -->
-    <link href="{% static 'css/custom.css' %}" rel="stylesheet">
+    <title>{% block title %}Hulkies Talkies{% endblock %}</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
 </head>
+<style>
+.logo-container {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.container-fluid {
+    margin-top: -20px; /* Adjust this value as needed */
+}
+body {
+  background-color: #74EBD5;
+  background-image: linear-gradient(90deg, #74EBD5 0%, #9FACE6 100%);
+
+  min-height: 100vh;
+}
+
+::-webkit-scrollbar {
+  width: 5px;
+}
+
+::-webkit-scrollbar-track {
+  width: 5px;
+  background: #f5f5f5;
+}
+
+::-webkit-scrollbar-thumb {
+  width: 1em;
+  background-color: #ddd;
+  outline: 1px solid slategrey;
+  border-radius: 1rem;
+}
+
+.text-small {
+  font-size: 0.9rem;
+}
+
+.messages-box,
+.chat-box {
+  height: 510px;
+  overflow-y: scroll;
+}
+
+.rounded-lg {
+  border-radius: 0.5rem;
+}
+
+input::placeholder {
+  font-size: 0.9rem;
+  color: #999;
+}
+h5 {
+    border-top: 2px solid #243145;
+    border-bottom: 2px solid #243145;
+
+}
+</style>
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <a class="navbar-brand" href="#">My Chat App</a>
-        <!-- Add navigation links here -->
+        <div class="logo-container">
+            <img src="{% static 'img/logo-sm.png' %}" alt="Logo" class="logo">
+        </div>
     </nav>
 
-    <div class="container mt-4">
-        {% block content %}
-        <!-- This block will be overridden by child templates -->
-        {% endblock %}
-    </div>
-
-    <footer class="footer mt-auto py-3 bg-light">
-        <div class="container">
-            <span class="text-muted">Copyright &copy; 2024 My Chat App</span>
+    <div class="container-fluid mt-4">
+        <div class="row">
+            <nav class="col-md-2 d-none d-md-block bg-light sidebar">
+                <div class="sidebar-sticky">
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Profile</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Group Chat</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-toggle="modal" data-target="#privateChatModal">Private Chat</a>
+                        </li>
+                    </ul>
+                </div>
+                <h5>Recent history</h5>
+                <div class="messages-box">
+                    <div class="list-group rounded-0">
+                      <a class="list-group-item list-group-item-action active text-white rounded-0">
+                        <div class="media"><img src="https://bootstrapious.com/i/snippets/sn-chat/avatar.svg" alt="user" width="50" class="rounded-circle">
+                          <div class="media-body ml-4">
+                            <div class="d-flex align-items-center justify-content-between mb-1">
+                              <h6 class="mb-0">Jason Doe</h6><small class="small font-weight-bold">25 Dec</small>
+                            </div>
+                            <p class="font-italic mb-0 text-small">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore.</p>
+                          </div>
+                        </div>
+                      </a>
+          
+                      <a href="#" class="list-group-item list-group-item-action list-group-item-light rounded-0">
+                        <div class="media"><img src="https://bootstrapious.com/i/snippets/sn-chat/avatar.svg" alt="user" width="50" class="rounded-circle">
+                          <div class="media-body ml-4">
+                            <div class="d-flex align-items-center justify-content-between mb-1">
+                              <h6 class="mb-0">Jason Doe</h6><small class="small font-weight-bold">14 Dec</small>
+                            </div>
+                            <p class="font-italic text-muted mb-0 text-small">Lorem ipsum dolor sit amet, consectetur. incididunt ut labore.</p>
+                          </div>
+                        </div>
+                      </a>
+                      <a class="list-group-item list-group-item-action active text-white rounded-0">
+                        <div class="media"><img src="https://bootstrapious.com/i/snippets/sn-chat/avatar.svg" alt="user" width="50" class="rounded-circle">
+                          <div class="media-body ml-4">
+                            <div class="d-flex align-items-center justify-content-between mb-1">
+                              <h6 class="mb-0">Jason Doe</h6><small class="small font-weight-bold">25 Dec</small>
+                            </div>
+                            <p class="font-italic mb-0 text-small">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore.</p>
+                          </div>
+                        </div>
+                      </a>
+          
+                      <a href="#" class="list-group-item list-group-item-action list-group-item-light rounded-0">
+                        <div class="media"><img src="https://bootstrapious.com/i/snippets/sn-chat/avatar.svg" alt="user" width="50" class="rounded-circle">
+                          <div class="media-body ml-4">
+                            <div class="d-flex align-items-center justify-content-between mb-1">
+                              <h6 class="mb-0">Jason Doe</h6><small class="small font-weight-bold">14 Dec</small>
+                            </div>
+                            <p class="font-italic text-muted mb-0 text-small">Lorem ipsum dolor sit amet, consectetur. incididunt ut labore.</p>
+                          </div>
+                        </div>
+                      </a>
+                      <a class="list-group-item list-group-item-action active text-white rounded-0">
+                        <div class="media"><img src="https://bootstrapious.com/i/snippets/sn-chat/avatar.svg" alt="user" width="50" class="rounded-circle">
+                          <div class="media-body ml-4">
+                            <div class="d-flex align-items-center justify-content-between mb-1">
+                              <h6 class="mb-0">Jason Doe</h6><small class="small font-weight-bold">25 Dec</small>
+                            </div>
+                            <p class="font-italic mb-0 text-small">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore.</p>
+                          </div>
+                        </div>
+                      </a>
+          
+                      <a href="#" class="list-group-item list-group-item-action list-group-item-light rounded-0">
+                        <div class="media"><img src="https://bootstrapious.com/i/snippets/sn-chat/avatar.svg" alt="user" width="50" class="rounded-circle">
+                          <div class="media-body ml-4">
+                            <div class="d-flex align-items-center justify-content-between mb-1">
+                              <h6 class="mb-0">Jason Doe</h6><small class="small font-weight-bold">14 Dec</small>
+                            </div>
+                            <p class="font-italic text-muted mb-0 text-small">Lorem ipsum dolor sit amet, consectetur. incididunt ut labore.</p>
+                          </div>
+                        </div>
+                      </a>
+                    </div>
+                </div>
+            </nav>
         </div>
-    </footer>
-
+    </div>
+<!-- Private Room Modal -->
+<div class="modal fade" id="privateChatModal" tabindex="-1" role="dialog" aria-labelledby="privateChatModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="privateChatModalLabel">Start Private Chat</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="privateChatForm">
+                    <div class="form-group">
+                        <label for="recipient">Select User:</label>
+                        <select class="form-control" id="recipient" name="recipient">
+                            <!-- Populate with users -->
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Start Chat</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- End Private Room Modal -->
     <!-- Include Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <footer class="footer mt-auto py-3 bg-light">
+        <div class="container">
+            <span class="text-muted">Copyright &copy; 2024 Hulkies Talkies</span>
+        </div>
+    </footer>
 </body>
 </html>
