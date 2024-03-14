@@ -9,14 +9,19 @@ class GroupChatConsumer(ChatConsumerBase):
         return f'group_chat_{room_name}'
     
 
+import logging
 from channels.generic.websocket import AsyncWebsocketConsumer
+
+logger = logging.getLogger(__name__)
 
 class TestConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         await self.accept()
+        logger.info("WebSocket connection established.")
 
     async def disconnect(self, close_code):
-        pass
+        logger.info("WebSocket connection closed.")
 
     async def receive(self, text_data):
+        logger.info(f"Received message: {text_data}")
         await self.send(text_data=text_data)

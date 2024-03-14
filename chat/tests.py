@@ -25,7 +25,7 @@ class ChatTestCase(TestCase):
 
     def test_chat_functionality(self):
         # WebSocket URI
-        uri = "ws://0.0.0.0:8001/ws/private/test-room/"
+        uri = "ws://0.0.0.0:8000/ws/private/test-room/"
         asyncio.run(self.send_and_receive_messages(uri))
 
     async def send_and_receive_messages(self, uri):

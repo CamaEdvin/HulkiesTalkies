@@ -13,9 +13,11 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 from pathlib import Path
 import os
 from django.core.management.utils import get_random_secret_key
+import environ
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+env = environ.Env()
 
 
 # Quick-start development settings - unsuitable for production
@@ -62,9 +64,10 @@ class ExcludeWebSocketFromCSRFMiddleware(CsrfViewMiddleware):
         return super().process_view(request, callback, callback_args, callback_kwargs)
 
 def get_websocket_path():
-    return WEBSOCKET_URL_PREFIX  # Customize this if needed
+    return WEBSOCKET_URL_PREFIX
 
 websocket_path = SimpleLazyObject(get_websocket_path)
+print("websocket_path: ", websocket_path)
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -178,13 +181,45 @@ SIMPLE_JWT = {
     'USER_ID_CLAIM': 'user_id',
 }
 
+REDIS_HOST = env.str('REDIS_HOST', 'redis')
+REDIS_PORT = env.str('REDIS_PORT', '6379')
+REDIS_SLOT = env.str('REDIS_SLOT', '0')
+REDIS_PASSWORD = env.str('REDIS_PASSWORD', None)
+REDIS_USER = env.str('REDIS_USER', None)
 
+if REDIS_USER:
+    REDIS_USER = REDIS_USER + '@'
+else:
+    REDIS_USER = ''
+REDIS_CHANNELS_SLOT = env.str('REDIS_CHANNELS_SLOT', '1')
+
+REDIS_URL = f'redis://{REDIS_USER}{REDIS_HOST}:{REDIS_PORT}/{REDIS_SLOT}'
+
+REDIS_OPTIONS = {
+    'PASSWORD': REDIS_PASSWORD
+}
+
+
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': [REDIS_URL],
+        'OPTIONS': REDIS_OPTIONS
+    },
+}
+
+if REDIS_PASSWORD:
+    REDIS_PASSWORD = ':' + REDIS_PASSWORD + '@'
+    REDIS_USER = env.str('REDIS_USER', '')
+else:
+    REDIS_PASSWORD = ''
 
 CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": {
-            "hosts": [("localhost", 6380)],
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [f'redis://{REDIS_USER}{REDIS_PASSWORD}{REDIS_HOST}:{REDIS_PORT}/{REDIS_CHANNELS_SLOT}'],
         },
     },
 }
