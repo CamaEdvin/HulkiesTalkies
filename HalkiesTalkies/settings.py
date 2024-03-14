@@ -52,7 +52,7 @@ from django.middleware.csrf import CsrfViewMiddleware
 from django.utils.functional import SimpleLazyObject
 from django.conf import settings
 
-class ExcludeWebSocketFromCSRFMiddleware(CsrfViewMiddleware):
+"""class ExcludeWebSocketFromCSRFMiddleware(CsrfViewMiddleware):
     def _accepts_websocket(self, request):
         return request.META.get('HTTP_CONNECTION', '').lower() == 'upgrade' and \
                request.META.get('HTTP_UPGRADE', '').lower() == 'websocket'
@@ -67,7 +67,7 @@ def get_websocket_path():
     return WEBSOCKET_URL_PREFIX
 
 websocket_path = SimpleLazyObject(get_websocket_path)
-print("websocket_path: ", websocket_path)
+print("websocket_path: ", websocket_path)"""
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
