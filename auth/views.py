@@ -19,10 +19,9 @@ class RegisterView(APIView):
         if serializer.is_valid():
             user = serializer.save()
             refresh = RefreshToken.for_user(user)
-            return Response({
-                'refresh': str(refresh),
-                'access': str(refresh.access_token),
-            }, status=status.HTTP_201_CREATED)
+            dashboard_url = reverse('dashboard')
+
+            return redirect(dashboard_url)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 
@@ -41,12 +40,8 @@ class LoginView(APIView):
                 user = User.objects.get(username=username)
                 if user.check_password(password):
                     refresh = RefreshToken.for_user(user)
-
-                    
-                    # Get the URL for the dashboard
                     dashboard_url = reverse('dashboard')
                 
-                    # Return a redirect response to the dashboard
                     return redirect(dashboard_url)
                 else:
                     return Response({'error': 'Invalid username or password'}, status=status.HTTP_401_UNAUTHORIZED)
