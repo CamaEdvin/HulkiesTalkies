@@ -29,7 +29,7 @@ SECRET_KEY = 'django-insecure-v^p!)_*!_^#!6#qa@9lqa_w%y8w$wnxn+$r%8+f2s=hh_qx^%(
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['194.195.241.225', '0.0.0.0', '127.0.0.1', 'chat_app']
+ALLOWED_HOSTS = ['139.162.189.203', '0.0.0.0', '127.0.0.1', 'chat_app']
 
 
 
