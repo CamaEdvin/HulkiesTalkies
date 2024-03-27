@@ -9,7 +9,7 @@ env/
 
 # Database files
 data/db/
-
+data/redis/dump.rdb
 # Local development settings
 *.sqlite3
 *.db

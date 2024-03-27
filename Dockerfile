@@ -13,11 +13,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
+# Install Daphne and Gunicorn
+RUN pip install daphne gunicorn
+
 # Copy the requirements.txt file and install Python dependencies
 COPY requirements.txt /app/
-
-RUN pip install --upgrade pip \
-    && pip install -r requirements.txt
+RUN pip install --upgrade pip && pip install -r requirements.txt
 
 # Copy the Django project files into the container
 COPY . /app/

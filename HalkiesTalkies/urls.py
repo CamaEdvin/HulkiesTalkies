@@ -19,7 +19,7 @@ from django.urls import path, include
 from django.views.generic import TemplateView
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
-
+from chat.routing import websocket_urlpatterns
 
 
 urlpatterns = [
@@ -27,4 +27,8 @@ urlpatterns = [
     path('auth/', include('auth.urls')),
     path('chat/', include('chat.urls')),
     path('', TemplateView.as_view(template_name='dashboard.html'), name='dashboard'),
+]
+
+urlpatterns += [
+    path('ws/', include(websocket_urlpatterns)),
 ]

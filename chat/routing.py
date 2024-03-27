@@ -1,8 +1,11 @@
-from django.urls import path, re_path
-from .consumers import PrivateChatConsumer, GroupChatConsumer, TestConsumer
+from django.urls import re_path
+from chat import consumers
+
 
 websocket_urlpatterns = [
-    re_path(r'ws/private/(?P<room_name>\w+)/$', PrivateChatConsumer.as_asgi()),
-    re_path(r'ws/group/(?P<room_name>\w+)/$', GroupChatConsumer.as_asgi()),
-    re_path(r'ws/test/$', TestConsumer.as_asgi()),
+    re_path(r'private/(?P<room_name>\w+)/$', consumers.PrivateChatConsumer.as_asgi()),
+    re_path(r'group/(?P<room_name>\w+)/$', consumers.GroupChatConsumer.as_asgi()),
+    re_path(r'test/$', consumers.TestConsumer.as_asgi()),
+    re_path(r'hello/$', consumers.PingConsumer.as_asgi()),
 ]
+

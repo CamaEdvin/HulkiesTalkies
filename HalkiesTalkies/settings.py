@@ -24,18 +24,19 @@ env = environ.Env()
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-v^p!)_*!_^#!6#qa@9lqa_w%y8w$wnxn+$r%8+f2s=hh_qx^%('
+SECRET_KEY = get_random_secret_key()
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['139.162.189.203', '0.0.0.0', '127.0.0.1', 'chat_app']
+ALLOWED_HOSTS = ['*']
 
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -48,26 +49,9 @@ INSTALLED_APPS = [
     'channels_redis',
 ]
 
-from django.middleware.csrf import CsrfViewMiddleware
-from django.utils.functional import SimpleLazyObject
-from django.conf import settings
 
-"""class ExcludeWebSocketFromCSRFMiddleware(CsrfViewMiddleware):
-    def _accepts_websocket(self, request):
-        return request.META.get('HTTP_CONNECTION', '').lower() == 'upgrade' and \
-               request.META.get('HTTP_UPGRADE', '').lower() == 'websocket'
 
-    def process_view(self, request, callback, callback_args, callback_kwargs):
-        if self._accepts_websocket(request):
-            # Skip CSRF check for WebSocket connections
-            return None
-        return super().process_view(request, callback, callback_args, callback_kwargs)
 
-def get_websocket_path():
-    return WEBSOCKET_URL_PREFIX
-
-websocket_path = SimpleLazyObject(get_websocket_path)
-print("websocket_path: ", websocket_path)"""
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -101,7 +85,18 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'HalkiesTalkies.wsgi.application'
+
+# Django Channels ASGI application
 ASGI_APPLICATION = 'HalkiesTalkies.asgi.application'
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("redis", 6379)],
+        },
+    },
+}
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
@@ -117,6 +112,7 @@ DATABASES = {
     }
 }
 
+REDIS_HOST = "redis"
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
@@ -179,47 +175,4 @@ SIMPLE_JWT = {
     'AUTH_HEADER_NAME': 'HTTP_AUTHORIZATION',
     'USER_ID_FIELD': 'username',
     'USER_ID_CLAIM': 'user_id',
-}
-
-REDIS_HOST = env.str('REDIS_HOST', 'redis')
-REDIS_PORT = env.str('REDIS_PORT', '6379')
-REDIS_SLOT = env.str('REDIS_SLOT', '0')
-REDIS_PASSWORD = env.str('REDIS_PASSWORD', None)
-REDIS_USER = env.str('REDIS_USER', None)
-
-if REDIS_USER:
-    REDIS_USER = REDIS_USER + '@'
-else:
-    REDIS_USER = ''
-REDIS_CHANNELS_SLOT = env.str('REDIS_CHANNELS_SLOT', '1')
-
-REDIS_URL = f'redis://{REDIS_USER}{REDIS_HOST}:{REDIS_PORT}/{REDIS_SLOT}'
-
-REDIS_OPTIONS = {
-    'PASSWORD': REDIS_PASSWORD
-}
-
-
-
-CACHES = {
-    'default': {
-        'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': [REDIS_URL],
-        'OPTIONS': REDIS_OPTIONS
-    },
-}
-
-if REDIS_PASSWORD:
-    REDIS_PASSWORD = ':' + REDIS_PASSWORD + '@'
-    REDIS_USER = env.str('REDIS_USER', '')
-else:
-    REDIS_PASSWORD = ''
-
-CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        'CONFIG': {
-            "hosts": [f'redis://{REDIS_USER}{REDIS_PASSWORD}{REDIS_HOST}:{REDIS_PORT}/{REDIS_CHANNELS_SLOT}'],
-        },
-    },
 }

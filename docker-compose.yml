@@ -24,12 +24,25 @@ services:
     command:
       - 'redis-server'
 
+  daphne:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    command: daphne -b 0.0.0.0 -p 8001 HalkiesTalkies.asgi:application
+    volumes:
+      - .:/app
+    ports:
+      - "8001:8001"
+    depends_on:
+      - db
+      - redis
+
   web:
     container_name: chat_app
     build: 
       context: .
       dockerfile: ./Dockerfile
-    command: bash -c "python manage.py makemigrations --merge --noinput & python manage.py migrate & python manage.py runserver 0.0.0.0:8000"
+    command: gunicorn HalkiesTalkies.wsgi:application --bind 0.0.0.0:8000
     volumes:
       - .:/app
     ports:
