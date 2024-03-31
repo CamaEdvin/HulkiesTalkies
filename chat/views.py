@@ -13,3 +13,10 @@ class NewRoomView(View):
     def post(self, request):
         selected_user_id = request.POST.get('recipient')
         return redirect('chat')
+    
+
+def dashboard(request):
+    users = User.objects.all()
+    context = {'users': users}
+    print("context: ", context)
+    return render(request, 'dashboard.html', context)

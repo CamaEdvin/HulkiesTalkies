@@ -16,18 +16,18 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from django.views.generic import TemplateView
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth.views import LoginView
 from chat.routing import websocket_urlpatterns
+from django.conf import settings
+from django.conf.urls.static import static
+from chat import views
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('auth/', include('auth.urls')),
     path('chat/', include('chat.urls')),
-    path('', TemplateView.as_view(template_name='dashboard.html'), name='dashboard'),
-]
+    path('', views.dashboard, name='dashboard'),
+] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 urlpatterns += [
     path('ws/', include(websocket_urlpatterns)),

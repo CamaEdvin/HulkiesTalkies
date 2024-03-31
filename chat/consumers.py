@@ -1,5 +1,4 @@
 from chat import mixins
-from asgiref.sync import sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer, AsyncConsumer
 import json
 
