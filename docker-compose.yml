@@ -25,6 +25,7 @@ services:
       - 'redis-server'
 
   daphne:
+    container_name: chat_daphne
     build:
       context: .
       dockerfile: ./Dockerfile
