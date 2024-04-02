@@ -45,6 +45,17 @@ class NewRoomView(View):
 
 def dashboard(request):
     users = User.objects.all()
-    context = {'users': users}
-    print("context: ", context)
+    rooms = models.Room.objects.all()
+    messages = []
+
+    for room in rooms:
+        latest_message = models.Message.objects.filter(room=room).order_by('-timestamp').first()
+        messages.append({'room': room, 'latest_message': latest_message})
+
+
+    context = {
+        'users': users,
+        'messages': messages
+        }
+
     return render(request, 'dashboard.html', context)

@@ -8,7 +8,11 @@ from channels.db import database_sync_to_async
 class ChatConsumerBase(AsyncWebsocketConsumer):
     async def connect(self):
         self.room_name = self.scope['url_route']['kwargs']['room_name']
+
+        print("self.room_name: ", self.room_name)
         self.room_group_name = self.get_room_group_name(self.room_name)
+
+
 
         await self.channel_layer.group_add(
             self.room_group_name,
@@ -53,4 +57,7 @@ class ChatConsumerBase(AsyncWebsocketConsumer):
         sender = User.objects.get(username=username)
         room = models.Room.objects.get(name=self.room_name)
         models.Message.objects.create(content=message, sender=sender, room=room)
+
+    def get_room_group_name(self, room_name):
+        return f'chat_{room_name}'
 
