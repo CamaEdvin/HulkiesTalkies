@@ -77,4 +77,53 @@
   
       </div>
     </div>
+
+
+    <script>
+      // WebSocket connection based on room type and name
+      var roomName = "{{ room_name }}";
+      var roomType = "{{ room_type }}";
+
+      console.log("roomName: ", roomName);
+      console.log("roomType: ", roomType);
+
+      var wsProtocol = window.location.protocol == 'https:' ? 'wss://' : 'ws://';
+      var wsPath = wsProtocol + window.location.host + '/';
+      console.log("wsProtocol: ", wsProtocol);
+      console.log("wsPath: ", wsPath);
+
+      if (roomType === 'private') {
+          var wsUrl = wsPath + 'private/' + roomName + '/';
+      } else if (roomType === 'group') {
+          var wsUrl = wsPath + 'group/' + roomName + '/';
+      }
+
+      console.log("wsUrl: ", wsUrl);
+
+      var chatSocket = new WebSocket(wsUrl);
+
+      console.log("chatSocket: ", chatSocket);
+
+      // Handle WebSocket events
+      chatSocket.onopen = function() {
+          console.log('WebSocket connection established.');
+      };
+
+      chatSocket.onmessage = function(event) {
+          console.log('Received message: ' + event.data);
+          // Handle incoming messages, update chat interface as needed
+      };
+
+      chatSocket.onclose = function(event) {
+          console.log('WebSocket connection closed:', event);
+      };
+
+      // Function to send messages over WebSocket
+      function sendMessage(message) {
+          chatSocket.send(message);
+      }
+
+      // Example usage:
+      sendMessage('Hello, WebSocket!');
+  </script>
 {% endblock %}
