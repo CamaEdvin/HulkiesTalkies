@@ -42,33 +42,32 @@
     </div>
 
     <script>
-       const roomName = '{{ room.name }}'; 
-        const jwtToken = '{{ jwt_token }}';
-      var currentUserUsername = "{{ user }}";
+       const urlParams = new URLSearchParams(window.location.search);
+       const jwtToken = urlParams.get('access_token');
+       const roomName = '{{ data.room.name }}';
+       const currentUserUsername = urlParams.get('user_id');
 
       console.log("roomName: ", roomName);
       console.log("jwtToken: ", jwtToken);
       console.log("currentUserUsername: ", currentUserUsername);
   
       const chatSocket = new WebSocket(
-          'ws://139.162.189.203/:8001/ws/private/'
-          + roomName
-          + '/',
-          ['Authorization', 'Bearer ' + jwtToken]
-      );
+        `ws://139.162.189.203:8001/ws/private/${roomName}/`,
+        ['Bearer', jwtToken]
+    );
       chatSocket.onopen = function(event) {
           // WebSocket connection is open
           console.log("WebSocket connection opened");
       };
   
       chatSocket.onmessage = function(e) {
-          const data = JSON.parse(e.data);
-          const chatLog = document.getElementById('chat-log');
-          const messageElement = document.createElement('div');
-  
-          const senderClass = data.sender === '{{ request.user.username }}' ? 'media w-50 mb-3' : 'media w-50 ml-auto mb-3';
-          const bgClass = data.sender === '{{ request.user.username }}' ? 'bg-light' : 'bg-primary';
-          const textClass = data.sender === '{{ request.user.username }}' ? 'text-muted' : 'text-white';
+        const data = JSON.parse(e.data);
+        const chatLog = document.getElementById('chat-log');
+        const messageElement = document.createElement('div');
+
+        const senderClass = data.sender === currentUserUsername ? 'media w-50 mb-3' : 'media w-50 ml-auto mb-3';
+        const bgClass = data.sender === currentUserUsername ? 'bg-light' : 'bg-primary';
+        const textClass = data.sender === currentUserUsername ? 'text-muted' : 'text-white';
   
           messageElement.innerHTML = `
               <div class="${senderClass}">
