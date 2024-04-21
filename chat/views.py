@@ -86,4 +86,9 @@ def room_detail(request, room_id):
     serialized_data = json.dumps(data)
     print("serialized_data: ", serialized_data)
     json_response = JsonResponse({'data': serialized_data})
-    return JsonResponse(data)
+
+    if request.accepts('application/json'):
+        return JsonResponse(data)
+
+    # Otherwise, render the template with JSON data
+    return render(request, 'chat/chat.html', {'data': json.dumps(data)})

@@ -183,6 +183,7 @@ h5 {
         })
         .then(data => {
             console.log("Response data: ", data);
+            window.location.href = `/chat/room/${data.room.id}/&user=${data.user}&messages=${encodeURIComponent(JSON.stringify(data.messages))}`;
             try {
                 const jsonData = JSON.parse(data);  // Try parsing as JSON
                 console.log("Parsed JSON data: ", jsonData);
