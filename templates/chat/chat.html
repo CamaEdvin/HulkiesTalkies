@@ -51,7 +51,7 @@
       console.log("currentUserUsername: ", currentUserUsername);
   
       const chatSocket = new WebSocket(
-          'ws://localhost:8001/ws/private/'
+          'ws://139.162.189.203/:8001/ws/private/'
           + roomName
           + '/',
           ['Authorization', 'Bearer ' + jwtToken]
