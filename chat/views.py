@@ -68,7 +68,7 @@ def dashboard(request):
     return render(request, 'dashboard.html', context)
 
 class RoomDetailView(APIView):
-    permission_classes = [IsAuthenticated]
+    #permission_classes = [IsAuthenticated]
 
     def get(self, request, room_id):
         user = request.user
