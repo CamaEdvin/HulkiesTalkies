@@ -17,6 +17,7 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         jwt_token = None
         print("self.scope['headers']: ", self.scope['headers'])
+        print("self.scope['url_route']['kwargs']['room_name']: ", self.scope['url_route']['kwargs']['room_name'])
         if 'Authorization' in self.scope['headers']:
             try:
                 jwt_token = self.scope['headers']['Authorization'].decode('utf-8').split()[1]
@@ -45,7 +46,7 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
             return
         
         try:
-            self.room.name = self.scope['url_route']['kwargs']['room_name']
+            self.room_name = self.scope['url_route']['kwargs']['room_name']
         except KeyError:
             logger.error("Room name not provided")
             await self.close()
