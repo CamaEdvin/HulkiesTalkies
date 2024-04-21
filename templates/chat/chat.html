@@ -53,7 +53,7 @@
   
       const chatSocket = new WebSocket(
         `ws://139.162.189.203:8001/ws/private/${roomName}/`,
-        ['Bearer', jwtToken]
+        ['Bearer ' + jwtToken]
     );
       chatSocket.onopen = function(event) {
           // WebSocket connection is open
