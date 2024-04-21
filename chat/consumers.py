@@ -45,16 +45,19 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
             await self.close()
             return
         
-        try:
-            self.room_name = self.scope['url_route']['kwargs']['room_name']
-        except KeyError:
-            logger.error("Room name not provided")
+        room_name = self.scope['url_route']['kwargs']['room_name']
+
+        # Fetch the room object from the database
+        room = await self.get_room(room_name)
+        print("room: ", room)
+        if room is None:
+            logger.error(f"Room '{room_name}' not found")
             await self.close()
             return
 
         # Add the channel to the room group
         await self.channel_layer.group_add(
-            self.room.name,
+            room.name,
             self.channel_name
         )
 
@@ -113,8 +116,12 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
             return User.objects.get(id=user_id)
         return None
 
-    def get_name(self, room):
-        return f'chat_{room}'
+    @database_sync_to_async
+    def get_room(self, room_name):
+        try:
+            return models.Room.objects.get(name=room_name)
+        except models.Room.DoesNotExist:
+            return None
 
 """class GroupChatConsumer(mixins.ChatConsumerBase):
     def get_name(self, name):
