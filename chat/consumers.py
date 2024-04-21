@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 class PrivateChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         jwt_token = None
+        print("self.scope['headers']: ", self.scope['headers'])
         if 'Authorization' in self.scope['headers']:
             try:
                 jwt_token = self.scope['headers']['Authorization'].decode('utf-8').split()[1]
@@ -44,7 +45,7 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
             return
         
         try:
-            self.room_name = self.scope['url_route']['kwargs']['room_name']
+            self.room.name = self.scope['url_route']['kwargs']['room_name']
         except KeyError:
             logger.error("Room name not provided")
             await self.close()
@@ -52,17 +53,17 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
 
         # Add the channel to the room group
         await self.channel_layer.group_add(
-            self.room_name,
+            self.room.name,
             self.channel_name
         )
 
         # Accept the WebSocket connection
         await self.accept(subprotocol='websocket')
-        logger.info(f"WebSocket connection established for room {self.room_name}")
+        logger.info(f"WebSocket connection established for room {self.room.name}")
 
     async def disconnect(self, close_code):
         await self.channel_layer.group_discard(
-            self.room_name,
+            self.room.name,
             self.channel_name
         )
         logger.info(f"WebSocket connection closed for room {self.room_name}")
@@ -77,7 +78,7 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
 
         # Send the message to the room group
         await self.channel_layer.group_send(
-            self.room_name,
+            self.room.name,
             {
                 'type': 'chat_message',
                 'message': message,
