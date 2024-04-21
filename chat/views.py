@@ -73,7 +73,7 @@ class RoomDetailView(APIView):
     def get(self, request, room_id):
         user = request.user
         room = get_object_or_404(models.Room, id=room_id)
-        messages = Message.objects.filter(room=room).order_by('-timestamp')
+        messages = models.Message.objects.filter(room=room).order_by('-timestamp')
         
         room_serializer = RoomSerializer(room)
         message_serializer = MessageSerializer(messages, many=True)
