@@ -83,4 +83,7 @@ def room_detail(request, room_id):
         'user': user.username
     }
     print("data: ", data)
-    return render(request, 'chat/chat.html', {'data': json.dumps(data)}) 
+    serialized_data = json.dumps(data)
+    print("serialized_data: ", serialized_data)
+    json_response = JsonResponse({'data': serialized_data})
+    return json_response
