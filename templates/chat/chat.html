@@ -51,7 +51,11 @@
       console.log("jwtToken: ", jwtToken);
       console.log("userId: ", userId);
   
-      const socket = new WebSocket(`ws://139.162.189.203:8001/ws/private/${roomName}/?access_token=${jwtToken}&user_id=${userId}`);
+      const socket = new WebSocket(`ws://139.162.189.203:8001/ws/private/${roomName}/?access_token=${jwtToken}&user_id=${userId}`, {
+        headers: {
+            Authorization: `Bearer ${jwtToken}`,
+        },
+        });
       chatSocket.onopen = function(event) {
           // WebSocket connection is open
           console.log("WebSocket connection opened");
