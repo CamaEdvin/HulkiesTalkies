@@ -92,22 +92,25 @@ h5 {
                 <h5>Recent history</h5>
                 <div class="messages-box">
                     <div class="list-group rounded-0">
+                        {% for message in messages %}
+                        <a href="javascript:void(0);" onclick="redirectToRoomDetail('{{ message.room.id }}')" class="list-group-item list-group-item-action list-group-item-light rounded-0">
 
-                    {% for message in messages %}
-                          <a href="{% if message.room.room_type == 'private' %}/ws/private/{{ message.room.name }}/{% elif message.room.room_type == 'group' %}/ws/group/{{ message.room.name }}/{% endif %}" class="list-group-item list-group-item-action list-group-item-light rounded-0">                        <div class="media"><img src="https://bootstrapious.com/i/snippets/sn-chat/avatar.svg" alt="user" width="50" class="rounded-circle">
-                            <div class="media-body ml-4">
-                                <div class="d-flex align-items-center justify-content-between mb-1">
-                                    <h6 class="mb-0">{{ message.room.name }}</h6><small class="small font-weight-bold">{{ message.latest_message.timestamp|date:"d M" }}</small>
+                        
+                                <div class="media"><img src="https://bootstrapious.com/i/snippets/sn-chat/avatar.svg" alt="user" width="50" class="rounded-circle">
+                                    <div class="media-body ml-4">
+                                        <div class="d-flex align-items-center justify-content-between mb-1">
+                                            <h6 class="mb-0">{{ message.room.name }}</h6><small class="small font-weight-bold">{{ message.latest_message.timestamp|date:"d M" }}</small>
+                                        </div>
+                                    <p class="font-italic text-muted mb-0 text-small">{{ message.latest_message.content }}</p>
+                                    </div>
                                 </div>
-                                <p class="font-italic text-muted mb-0 text-small">{{ message.latest_message.content }}</p>
-                            </div>
-                        </div>
-                    </a>
-                    {% endfor %}
-                      
+                            </a>
+                        {% endfor %}
                     </div>
                 </div>
             </nav>
+            {% block content %}
+            {% endblock %}
         </div>
     </div>
 <!-- Private Room Modal -->
@@ -148,6 +151,45 @@ h5 {
           $('#recipients').select2();
       });
     </script>
+<script>
+    function redirectToRoomDetail(roomId) {
+    const urlParams = new URLSearchParams(window.location.search);
+    const accessToken = urlParams.get('access_token');
+    const userId = urlParams.get('user_id');
+    const roomName = urlParams.get('room_name');
+    
+    console.log("urlParams: ", urlParams);
+    console.log("accessToken: ", accessToken);
+    console.log("userId: ", userId);
+    console.log("roomName: ", roomName);
+
+    const headers = new Headers();
+    headers.append('Authorization', `Bearer ${accessToken}`);
+
+    console.log("headers: ", headers);
+
+    const requestOptions = {
+        method: 'GET',
+        headers: headers,
+        redirect: 'follow'
+    };
+
+    console.log("requestOptions: ", requestOptions);
+
+    fetch(`/chat/room/${roomId}/?access_token=${accessToken}&user_id=${userId}&room_name=${roomName}`, requestOptions)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => console.log(data))
+        .catch(error => console.error('There was an error!', error));
+}
+
+</script>
+
+
     <footer class="footer mt-auto py-3 bg-light">
         <div class="container">
             <span class="text-muted">Copyright &copy; 2024 Hulkies Talkies</span>

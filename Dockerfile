@@ -16,6 +16,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Install Daphne and Gunicorn
 RUN pip install daphne gunicorn
 
+# Install Twisted extras for HTTP/2 and TLS support
+RUN pip install -U "Twisted[tls,http2]"
+
 # Copy the requirements.txt file and install Python dependencies
 COPY requirements.txt /app/
 RUN pip install --upgrade pip && pip install -r requirements.txt

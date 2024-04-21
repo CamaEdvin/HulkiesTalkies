@@ -43,14 +43,33 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'chat',
-    'rest_framework',
     'channels',
     'channels_redis',
+    'rest_framework',
+    'rest_framework_simplejwt',
+    'chat',
 ]
 
 
+# Simple JWT auth
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}
+
+from datetime import timedelta
+
+
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
+    'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
+    'SLIDING_TOKEN_LIFETIME': timedelta(days=30),
+    'SLIDING_TOKEN_REFRESH_LIFETIME_LATE_USER': timedelta(days=1),
+    'SLIDING_TOKEN_LIFETIME_LATE_USER': timedelta(days=30),
+}
 
 
 MIDDLEWARE = [
@@ -104,11 +123,11 @@ CHANNEL_LAYERS = {
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('POSTGRES_NAME', 'halkiestalkies_db'),
-        'USER': os.environ.get('POSTGRES_USER', 'halkiestalkies_user'),
-        'PASSWORD': os.environ.get('POSTGRES_PASSWORD', 'halkiestalkies_pass'),
-        'HOST': os.environ.get('POSTGRES_HOST', 'db'),
-        'PORT': os.environ.get('POSTGRES_PORT', '5432'),
+        'NAME': 'halkiestalkies_db',
+        'USER': 'halkiestalkies_user',
+        'PASSWORD': 'halkiestalkies_pass',
+        'HOST': 'db', 
+        'PORT': '5432',
     }
 }
 
@@ -151,7 +170,7 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
@@ -159,17 +178,5 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-# Simple JWT auth
 
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-    ),
-}
-
-SIMPLE_JWT = {
-    'AUTH_HEADER_TYPES': ('JWT',),
-    'AUTH_HEADER_NAME': 'HTTP_AUTHORIZATION',
-    'USER_ID_FIELD': 'username',
-    'USER_ID_CLAIM': 'user_id',
-}
+LOGIN_URL = 'auth/login/'

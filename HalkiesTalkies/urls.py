@@ -27,10 +27,7 @@ urlpatterns = [
     path('auth/', include('auth.urls')),
     path('chat/', include('chat.urls')),
     path('', views.dashboard, name='dashboard'),
-]
-
-urlpatterns += [
-    path('ws/', include((websocket_urlpatterns, 'chat'), namespace='ws')),
+    
 ]
 
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

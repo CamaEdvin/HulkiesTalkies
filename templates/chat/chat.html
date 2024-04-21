@@ -1,129 +1,107 @@
-{% extends "base.html" %}
+
 {% block content %}
     <!-- Chat Box-->
     <div class="col-7 px-0">
-        <div class="px-4 py-5 chat-box bg-white">
-          <!-- Sender Message-->
-          <div class="media w-50 mb-3"><img src="https://bootstrapious.com/i/snippets/sn-chat/avatar.svg" alt="user" width="50" class="rounded-circle">
-            <div class="media-body ml-3">
-              <div class="bg-light rounded py-2 px-3 mb-2">
-                <p class="text-small mb-0 text-muted">Test which is a new approach all solutions</p>
-              </div>
-              <p class="small text-muted">12:00 PM | Aug 13</p>
-            </div>
-          </div>
-  
-          <!-- Reciever Message-->
-          <div class="media w-50 ml-auto mb-3">
-            <div class="media-body">
-              <div class="bg-primary rounded py-2 px-3 mb-2">
-                <p class="text-small mb-0 text-white">Test which is a new approach to have all solutions</p>
-              </div>
-              <p class="small text-muted">12:00 PM | Aug 13</p>
-            </div>
-          </div>
-  
-          <!-- Sender Message-->
-          <div class="media w-50 mb-3"><img src="https://bootstrapious.com/i/snippets/sn-chat/avatar.svg" alt="user" width="50" class="rounded-circle">
-            <div class="media-body ml-3">
-              <div class="bg-light rounded py-2 px-3 mb-2">
-                <p class="text-small mb-0 text-muted">Test, which is a new approach to have</p>
-              </div>
-              <p class="small text-muted">12:00 PM | Aug 13</p>
-            </div>
-          </div>
-  
-          <!-- Reciever Message-->
-          <div class="media w-50 ml-auto mb-3">
-            <div class="media-body">
-              <div class="bg-primary rounded py-2 px-3 mb-2">
-                <p class="text-small mb-0 text-white">Apollo University, Delhi, India Test</p>
-              </div>
-              <p class="small text-muted">12:00 PM | Aug 13</p>
-            </div>
-          </div>
-  
-          <!-- Sender Message-->
-          <div class="media w-50 mb-3"><img src="https://bootstrapious.com/i/snippets/sn-chat/avatar.svg" alt="user" width="50" class="rounded-circle">
-            <div class="media-body ml-3">
-              <div class="bg-light rounded py-2 px-3 mb-2">
-                <p class="text-small mb-0 text-muted">Test, which is a new approach</p>
-              </div>
-              <p class="small text-muted">12:00 PM | Aug 13</p>
-            </div>
-          </div>
-  
-          <!-- Reciever Message-->
-          <div class="media w-50 ml-auto mb-3">
-            <div class="media-body">
-              <div class="bg-primary rounded py-2 px-3 mb-2">
-                <p class="text-small mb-0 text-white">Apollo University, Delhi, India Test</p>
-              </div>
-              <p class="small text-muted">12:00 PM | Aug 13</p>
-            </div>
-          </div>
-  
+        <div class="px-4 py-5 chat-box bg-white" id="chat-log">
+            {% for message in data.messages %}
+                {% if message.sender == request.user %}
+                    <!-- Sender Message -->
+                    <div class="media w-50 mb-3"><img src="https://bootstrapious.com/i/snippets/sn-chat/avatar.svg" alt="user" width="50" class="rounded-circle">
+                        <div class="media-body ml-3">
+                            <div class="bg-light rounded py-2 px-3 mb-2">
+                                <p class="text-small mb-0 text-white">{{ message.content }}</p>
+                                <p class="text-small mb-0 text-muted">{{ message.status }}</p>
+                            </div>
+                            <p class="small text-muted">{{ message.timestamp }}</p>
+                        </div>
+                    </div>
+                {% else %}
+                    <!-- Receiver Message -->
+                    <div class="media w-50 ml-auto mb-3">
+                        <div class="media-body">
+                            <div class="bg-primary rounded py-2 px-3 mb-2">
+                                <p class="text-small mb-0 text-white">{{ message.content }}</p>
+                                <p class="text-small mb-0 text-muted">{{ message.status }}</p>
+                            </div>
+                            <p class="small text-muted">{{ message.timestamp }}</p>
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
         </div>
-  
+
         <!-- Typing area -->
-        <form action="#" class="bg-light">
-          <div class="input-group">
-            <input type="text" placeholder="Type a message" aria-describedby="button-addon2" class="form-control rounded-0 border-0 py-4 bg-light">
-            <div class="input-group-append">
-              <button id="button-addon2" type="submit" class="btn btn-link"> <i class="fa fa-paper-plane"></i></button>
+        <form id="chat-form" class="bg-light">
+            <div class="input-group">
+                <input type="text" id="chat-message-input" placeholder="Type a message" aria-describedby="button-addon2" class="form-control rounded-0 border-0 py-4 bg-light">
+                <div class="input-group-append">
+                    <button id="chat-message-submit" type="submit" class="btn btn-link"> <i class="fa fa-paper-plane"></i></button>
+                </div>
             </div>
-          </div>
         </form>
-  
-      </div>
     </div>
 
-
     <script>
-      // WebSocket connection based on room type and name
-      var roomName = "{{ room_name }}";
-      var roomType = "{{ room_type }}";
+       const roomName = '{{ room.name }}'; 
+        const jwtToken = '{{ jwt_token }}';
+      var currentUserUsername = "{{ user }}";
 
       console.log("roomName: ", roomName);
-      console.log("roomType: ", roomType);
-
-      var wsProtocol = window.location.protocol == 'https:' ? 'wss://' : 'ws://';
-      var wsPath = wsProtocol + window.location.host + '/';
-      console.log("wsProtocol: ", wsProtocol);
-      console.log("wsPath: ", wsPath);
-
-      if (roomType === 'private') {
-          var wsUrl = wsPath + 'private/' + roomName + '/';
-      } else if (roomType === 'group') {
-          var wsUrl = wsPath + 'group/' + roomName + '/';
-      }
-
-      console.log("wsUrl: ", wsUrl);
-
-      var chatSocket = new WebSocket(wsUrl);
-
-      console.log("chatSocket: ", chatSocket);
-
-      // Handle WebSocket events
-      chatSocket.onopen = function() {
-          console.log('WebSocket connection established.');
+      console.log("jwtToken: ", jwtToken);
+      console.log("currentUserUsername: ", currentUserUsername);
+  
+      const chatSocket = new WebSocket(
+          'ws://localhost:8001/ws/private/'
+          + roomName
+          + '/',
+          ['Authorization', 'Bearer ' + jwtToken]
+      );
+      chatSocket.onopen = function(event) {
+          // WebSocket connection is open
+          console.log("WebSocket connection opened");
       };
-
-      chatSocket.onmessage = function(event) {
-          console.log('Received message: ' + event.data);
-          // Handle incoming messages, update chat interface as needed
+  
+      chatSocket.onmessage = function(e) {
+          const data = JSON.parse(e.data);
+          const chatLog = document.getElementById('chat-log');
+          const messageElement = document.createElement('div');
+  
+          const senderClass = data.sender === '{{ request.user.username }}' ? 'media w-50 mb-3' : 'media w-50 ml-auto mb-3';
+          const bgClass = data.sender === '{{ request.user.username }}' ? 'bg-light' : 'bg-primary';
+          const textClass = data.sender === '{{ request.user.username }}' ? 'text-muted' : 'text-white';
+  
+          messageElement.innerHTML = `
+              <div class="${senderClass}">
+                  <img src="https://bootstrapious.com/i/snippets/sn-chat/avatar.svg" alt="user" width="50" class="rounded-circle">
+                  <div class="media-body ml-3">
+                      <div class="${bgClass} rounded py-2 px-3 mb-2">
+                          <p class="text-small mb-0 ${textClass}">${data.message}</p>
+                      </div>
+                      <p class="small text-muted">${data.timestamp}</p>
+                  </div>
+              </div>
+          `;
+          chatLog.appendChild(messageElement);
       };
-
-      chatSocket.onclose = function(event) {
-          console.log('WebSocket connection closed:', event);
+  
+      chatSocket.onclose = function(e) {
+          console.error('Chat socket closed unexpectedly');
       };
-
-      // Function to send messages over WebSocket
-      function sendMessage(message) {
-          chatSocket.send(message);
-      }
-
-      // Example usage:
-      sendMessage('Hello, WebSocket!');
+  
+      document.querySelector('#chat-message-input').focus();
+      const chatForm = document.querySelector('#chat-form');
+      chatForm.addEventListener('submit', function(e) {
+          e.preventDefault();  // Prevent the default form submission behavior
+          const messageInputDom = document.querySelector('#chat-message-input');
+          const message = messageInputDom.value.trim();  // Trim whitespace from the message
+          if (message !== '') {  // Check if the message is not empty
+              chatSocket.send(JSON.stringify({
+                  'message': message
+              }));
+              messageInputDom.value = '';  // Clear the input field after sending
+          }
+      });
   </script>
+  
+  
 {% endblock %}

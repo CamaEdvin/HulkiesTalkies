@@ -1,9 +1,14 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.models import User
 from django.views import View
 from django.shortcuts import redirect
 from chat import models
-
+from django.contrib.auth.decorators import login_required
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from .serializers import RoomSerializer, MessageSerializer
+from rest_framework.response import Response
+from django.http import JsonResponse
 
 class NewRoomView(View):
     def get(self, request):
@@ -59,3 +64,28 @@ def dashboard(request):
         }
 
     return render(request, 'dashboard.html', context)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def room_detail(request, room_id):
+    user = request.user
+    print("user: ", user)
+    room = get_object_or_404(models.Room, id=room_id)
+    print("room: ", room)
+    messages = models.Message.objects.filter(room=room).order_by('-timestamp')
+    print("messages: ", messages)
+    room_serializer = RoomSerializer(room)
+    message_serializer = MessageSerializer(messages, many=True)
+    data = {
+        'room': room_serializer.data,
+        'messages': message_serializer.data,
+        'user': user.username,
+        'access_token': request.GET.get('access_token', ''),
+        'user_id': request.GET.get('user_id', ''),
+        'room_name': request.GET.get('room_name', '')
+    }
+
+    if request.is_ajax():
+        return JsonResponse(data)
+    else:
+        return render(request, 'chat/chat.html', data)
