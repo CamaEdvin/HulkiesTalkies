@@ -44,8 +44,7 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
             return
         
         try:
-            self.room = self.scope['url_route']['kwargs']['room_name']
-            self.room.name = self.get_name(self.room)
+            self.room_name = self.scope['url_route']['kwargs']['room_name']
         except KeyError:
             logger.error("Room name not provided")
             await self.close()
@@ -53,31 +52,32 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
 
         # Add the channel to the room group
         await self.channel_layer.group_add(
-            self.room.name,
+            self.room_name,
             self.channel_name
         )
 
         # Accept the WebSocket connection
         await self.accept(subprotocol='websocket')
-        logger.info(f"WebSocket connection established for room {self.room}")
+        logger.info(f"WebSocket connection established for room {self.room_name}")
 
     async def disconnect(self, close_code):
         await self.channel_layer.group_discard(
+            self.room_name,
             self.channel_name
         )
-        logger.info(f"WebSocket connection closed for room {self.room}")
+        logger.info(f"WebSocket connection closed for room {self.room_name}")
 
     async def receive(self, text_data=None, bytes_data=None):
         text_data_json = json.loads(text_data)
         message = text_data_json['message']
         username = self.scope['user'].username  # Assuming you have authentication set up
-        logger.info(f"Received message in room {self.room} from {username}: {message}")
+        logger.info(f"Received message in room {self.room_name} from {username}: {message}")
 
         await self.save_message(message, username)
 
         # Send the message to the room group
         await self.channel_layer.group_send(
-            self.room.name,
+            self.room_name,
             {
                 'type': 'chat_message',
                 'message': message,
@@ -94,13 +94,11 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
             'message': message,
             'username': username
         }))
-        logger.info(f"Message sent to room {self.room}: {message}")
+        logger.info(f"Message sent to room {self.room_name}: {message}")
 
     async def save_message(self, message, username):
         sender = User.objects.get(username=username)
-        # Assuming you have a Message model to save messages
-        # Replace Message.objects.create(...) with your actual save logic
-        # models.Message.objects.create(content=message, sender=sender, room=self.room)
+        models.Message.objects.create(content=message, sender=sender, room=self.room)
         logger.info(f"Message saved in database for room {self.room}: {message}")
 
     def get_user_from_session(self):
