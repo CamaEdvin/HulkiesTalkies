@@ -62,9 +62,7 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
         logger.info(f"WebSocket connection established for room {self.room}")
 
     async def disconnect(self, close_code):
-        # Remove the channel from the room group
         await self.channel_layer.group_discard(
-            self.room.name,
             self.channel_name
         )
         logger.info(f"WebSocket connection closed for room {self.room}")
