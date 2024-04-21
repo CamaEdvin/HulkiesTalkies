@@ -183,10 +183,12 @@ h5 {
         })
         .then(data => {
             console.log("Response data: ", data);
-            // Render HTML content
-            document.getElementById('chat-container').innerHTML = data;
-            // Now handle WebSocket connection and JSON data parsing separately
-            handleWebSocket(roomName, accessToken);
+            try {
+                const jsonData = JSON.parse(data);  // Try parsing as JSON
+                console.log("Parsed JSON data: ", jsonData);
+            } catch (error) {
+                console.error('Error parsing JSON:', error);
+            }
         })
         .catch(error => console.error('There was an error!', error));
 }
