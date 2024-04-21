@@ -15,18 +15,31 @@ logger = logging.getLogger(__name__)
 
 class PrivateChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        jwt_token = self.scope['headers']['authorization'][1].decode('utf-8').split()[1]
+        jwt_token = None
+        if 'Authorization' in self.scope['headers']:
+            try:
+                jwt_token = self.scope['headers']['Authorization'].decode('utf-8').split()[1]
+            except IndexError:
+                logger.error("JWT token not provided")
+                await self.close()
+                return
+        else:
+            logger.error("Authorization header not found")
+            await self.close()
+            return
+
         print("jwt_token: ", jwt_token)
         
         # Authenticate the user using Simple JWT's JWTAuthentication
         jwt_authentication = JWTAuthentication()
+        print("jwt_authentication: ", jwt_authentication)
         try:
             user, _ = jwt_authentication.authenticate(jwt_token)
             # Set the authenticated user in the consumer's scope
             self.scope['user'] = user
         except Exception as e:
             # Handle authentication failure
-            print("Authentication error:", e)
+            logger.error(f"Authentication error: {e}")
             await self.close()
             return
         
@@ -37,19 +50,6 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
             logger.error("Room name not provided")
             await self.close()
             return
-
-        # Extract the user from the session
-        user = self.get_user_from_session()
-        print("user: ", user)
-
-        if user is None:
-            logger.error("User not found in session")
-            await self.close()
-            return
-
-        # Set the user in the scope
-        self.scope['user'] = user
-        print("self.scope: ", self.scope)
 
         # Add the channel to the room group
         await self.channel_layer.group_add(
