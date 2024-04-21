@@ -85,10 +85,5 @@ class RoomDetailView(APIView):
         }
 
         print("data: ", data)
-        
-        if request.accepted_renderer.format == 'html':
-            # Render the chat template if HTML is accepted
-            return render(request, 'chat/chat.html', {'data': data})
-        else:
-            # Return JSON data for other formats
-            return JsonResponse(data)
+        return render(request, 'chat/chat.html', {'data': data})
+       
