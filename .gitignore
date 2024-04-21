@@ -21,6 +21,7 @@ data/redis/dump.rdb
 media/
 storage/
 staticfiles/
+static/
 
 # IDE and editor-specific files
 .vscode/

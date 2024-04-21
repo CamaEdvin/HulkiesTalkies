@@ -183,7 +183,10 @@ h5 {
             }
             return response.json();
         })
-        .then(data => console.log(data))
+        .then(data => {
+            console.log(data);
+            window.location.href = `chat/chat.html?data=${encodeURIComponent(JSON.stringify(data))}`;
+        })
         .catch(error => console.error('There was an error!', error));
 }
 

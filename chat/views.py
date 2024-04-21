@@ -9,6 +9,7 @@ from rest_framework.permissions import IsAuthenticated
 from .serializers import RoomSerializer, MessageSerializer
 from rest_framework.response import Response
 from django.http import JsonResponse
+import json
 
 class NewRoomView(View):
     def get(self, request):
@@ -79,13 +80,7 @@ def room_detail(request, room_id):
     data = {
         'room': room_serializer.data,
         'messages': message_serializer.data,
-        'user': user.username,
-        'access_token': request.GET.get('access_token', ''),
-        'user_id': request.GET.get('user_id', ''),
-        'room_name': request.GET.get('room_name', '')
+        'user': user.username
     }
-
-    if request.is_ajax():
-        return JsonResponse(data)
-    else:
-        return render(request, 'chat/chat.html', data)
+    print("data: ", data)
+    return render(request, 'chat/chat.html', {'data': json.dumps(data)}) 
