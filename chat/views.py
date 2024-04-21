@@ -9,6 +9,8 @@ from .serializers import RoomSerializer, MessageSerializer
 from rest_framework.response import Response
 from django.http import JsonResponse
 import json
+from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
 
 class NewRoomView(View):
     def get(self, request):
