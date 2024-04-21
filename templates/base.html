@@ -183,7 +183,7 @@ h5 {
         })
         .then(data => {
             console.log("Response data: ", data);
-            window.location.href = `/chat/room/${roomId}/&user=${userId}`;
+            window.location.href = `/chat/room/${roomId}/`;
             try {
                 const jsonData = JSON.parse(data);  // Try parsing as JSON
                 console.log("Parsed JSON data: ", jsonData);
