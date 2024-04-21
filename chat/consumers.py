@@ -58,7 +58,7 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
         )
 
         # Accept the WebSocket connection
-        await self.accept()
+        await self.accept(subprotocol='websocket')
         logger.info(f"WebSocket connection established for room {self.room}")
 
     async def disconnect(self, close_code):

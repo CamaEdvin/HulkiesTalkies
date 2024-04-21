@@ -45,16 +45,13 @@
        const urlParams = new URLSearchParams(window.location.search);
        const jwtToken = urlParams.get('access_token');
        const roomName = '{{ data.room.name }}';
-       const currentUserUsername = urlParams.get('user_id');
+       const userId = urlParams.get('user_id');
 
       console.log("roomName: ", roomName);
       console.log("jwtToken: ", jwtToken);
-      console.log("currentUserUsername: ", currentUserUsername);
+      console.log("userId: ", userId);
   
-      const chatSocket = new WebSocket(
-        `ws://139.162.189.203:8001/ws/private/${roomName}/`,
-        'Bearer ' + jwtToken
-    );
+      const socket = new WebSocket(`ws://139.162.189.203:8001/ws/private/${roomName}/?access_token=${jwtToken}&user_id=${userId}`);
       chatSocket.onopen = function(event) {
           // WebSocket connection is open
           console.log("WebSocket connection opened");
