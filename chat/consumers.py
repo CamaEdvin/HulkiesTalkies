@@ -45,7 +45,7 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
         
         try:
             self.room = self.scope['url_route']['kwargs']['room_name']
-            self.name = self.get_name(self.room)
+            self.room.name = self.get_name(self.room)
         except KeyError:
             logger.error("Room name not provided")
             await self.close()
@@ -53,7 +53,7 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
 
         # Add the channel to the room group
         await self.channel_layer.group_add(
-            self.name,
+            self.room.name,
             self.channel_name
         )
 
@@ -64,7 +64,7 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
     async def disconnect(self, close_code):
         # Remove the channel from the room group
         await self.channel_layer.group_discard(
-            self.name,
+            self.room.name,
             self.channel_name
         )
         logger.info(f"WebSocket connection closed for room {self.room}")
@@ -79,7 +79,7 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
 
         # Send the message to the room group
         await self.channel_layer.group_send(
-            self.name,
+            self.room.name,
             {
                 'type': 'chat_message',
                 'message': message,
