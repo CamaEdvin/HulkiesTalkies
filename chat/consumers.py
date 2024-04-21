@@ -45,7 +45,7 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
         
         try:
             self.room = self.scope['url_route']['kwargs']['room_name']
-            self.room_group_name = self.get_room_group_name(self.room)
+            self.name = self.get_name(self.room)
         except KeyError:
             logger.error("Room name not provided")
             await self.close()
@@ -53,7 +53,7 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
 
         # Add the channel to the room group
         await self.channel_layer.group_add(
-            self.room_group_name,
+            self.name,
             self.channel_name
         )
 
@@ -64,7 +64,7 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
     async def disconnect(self, close_code):
         # Remove the channel from the room group
         await self.channel_layer.group_discard(
-            self.room_group_name,
+            self.name,
             self.channel_name
         )
         logger.info(f"WebSocket connection closed for room {self.room}")
@@ -79,7 +79,7 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
 
         # Send the message to the room group
         await self.channel_layer.group_send(
-            self.room_group_name,
+            self.name,
             {
                 'type': 'chat_message',
                 'message': message,
@@ -115,11 +115,11 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
             return User.objects.get(id=user_id)
         return None
 
-    def get_room_group_name(self, room):
+    def get_name(self, room):
         return f'chat_{room}'
 
 """class GroupChatConsumer(mixins.ChatConsumerBase):
-    def get_room_group_name(self, name):
+    def get_name(self, name):
         return f'group_chat_{name}'"""
 
 import logging
