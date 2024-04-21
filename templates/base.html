@@ -186,7 +186,6 @@ h5 {
         .then(data => {
             console.log(data);
             console.log("window.location.href: ", window.location.href);
-            window.location.href = `/path/to/chat.html?data=${encodeURIComponent(JSON.stringify(data))}`;
         })
         .catch(error => console.error('There was an error!', error));
 }
