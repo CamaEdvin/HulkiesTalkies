@@ -1,7 +1,6 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, render
 from django.contrib.auth.models import User
 from django.views import View
-from django.shortcuts import redirect
 from chat import models
 from django.contrib.auth.decorators import login_required
 from rest_framework.decorators import api_view, permission_classes
@@ -66,29 +65,28 @@ def dashboard(request):
 
     return render(request, 'dashboard.html', context)
 
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def room_detail(request, room_id):
-    user = request.user
-    print("user: ", user)
-    room = get_object_or_404(models.Room, id=room_id)
-    print("room: ", room)
-    messages = models.Message.objects.filter(room=room).order_by('-timestamp')
-    print("messages: ", messages)
-    room_serializer = RoomSerializer(room)
-    message_serializer = MessageSerializer(messages, many=True)
-    data = {
-        'room': room_serializer.data,
-        'messages': message_serializer.data,
-        'user': user.username
-    }
-    print("data: ", data)
-    serialized_data = json.dumps(data)
-    print("serialized_data: ", serialized_data)
-    json_response = JsonResponse({'data': serialized_data})
+class RoomDetailView(APIView):
+    permission_classes = [IsAuthenticated]
 
-    if request.accepts('application/json'):
-        return JsonResponse(data)
+    def get(self, request, room_id):
+        user = request.user
+        room = get_object_or_404(Room, id=room_id)
+        messages = Message.objects.filter(room=room).order_by('-timestamp')
+        
+        room_serializer = RoomSerializer(room)
+        message_serializer = MessageSerializer(messages, many=True)
+        
+        data = {
+            'room': room_serializer.data,
+            'messages': message_serializer.data,
+            'user': user.username
+        }
 
-    # Otherwise, render the template with JSON data
-    return render(request, 'chat/chat.html', {'data': json.dumps(data)})
+        print("data: ", data)
+        
+        if request.accepted_renderer.format == 'html':
+            # Render the chat template if HTML is accepted
+            return render(request, 'chat/chat.html', {'data': data})
+        else:
+            # Return JSON data for other formats
+            return JsonResponse(data)
