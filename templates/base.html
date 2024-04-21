@@ -178,14 +178,17 @@ h5 {
 
     fetch(`/chat/room/${roomId}/?access_token=${accessToken}&user_id=${userId}&room_name=${roomName}`, requestOptions)
         .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
+            console.log("Response status: ", response.status);
+            return response.text();  // Read the response as text first
         })
         .then(data => {
-            console.log(data);
-            console.log("window.location.href: ", window.location.href);
+            console.log("Response data: ", data);
+            try {
+                const jsonData = JSON.parse(data);  // Try parsing as JSON
+                console.log("Parsed JSON data: ", jsonData);
+            } catch (error) {
+                console.error('Error parsing JSON:', error);
+            }
         })
         .catch(error => console.error('There was an error!', error));
 }
