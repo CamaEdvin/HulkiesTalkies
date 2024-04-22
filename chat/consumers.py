@@ -49,12 +49,12 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
         await self.accept(subprotocol='websocket')
         logger.info(f"WebSocket connection established for room {room_name}")
 
-    async def disconnect(self, close_code):
+    """async def disconnect(self, close_code):
         await self.channel_layer.group_discard(
             self.room_name,
             self.channel_name
         )
-        logger.info(f"WebSocket connection closed for room {self.room_name}")
+        logger.info(f"WebSocket connection closed for room {self.room_name}")"""
 
     async def receive(self, text_data=None, bytes_data=None):
         text_data_json = json.loads(text_data)
