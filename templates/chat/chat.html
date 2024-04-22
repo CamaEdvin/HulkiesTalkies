@@ -56,7 +56,7 @@ const socket = new WebSocket(`ws://139.162.189.203:8001/ws/private/${roomName}/?
 
 // Define WebSocket event handlers
 socket.onopen = function(event) {
-    console.log("WebSocket connection opened");
+    console.log("WebSocket connection opened", event);
 };
 
 socket.onmessage = function(e) {
@@ -83,7 +83,7 @@ socket.onmessage = function(e) {
 };
 
 socket.onclose = function(e) {
-    console.error('Chat socket closed unexpectedly');
+    console.error('Chat socket closed unexpectedly', e);
 };
 
 // Add event listener for sending messages
