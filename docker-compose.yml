@@ -1,8 +1,4 @@
 version: "3.9"
-
-networks:
-  network-django:
-    driver: bridge
    
 services:
   db:
@@ -27,8 +23,6 @@ services:
       - 6379
     command:
       - 'redis-server'
-    networks:
-      - network-django
 
   daphne:
     container_name: chat_daphne
@@ -43,8 +37,6 @@ services:
     depends_on:
       - db
       - redis
-    networks:
-      - network-django
 
   web:
     container_name: chat_app
@@ -57,7 +49,3 @@ services:
       - .:/app
     ports:
       - "8000:8000"
-    depends_on:
-      - redis
-    networks:
-      - network-django
