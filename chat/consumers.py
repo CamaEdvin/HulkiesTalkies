@@ -43,20 +43,20 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
 
         # Add the channel to the room group using the room's name
         await self.channel_layer.group_add(
-            room.name,
+            room_name,
             self.channel_name
         )
 
         # Accept the WebSocket connection
         await self.accept(subprotocol='websocket')
-        logger.info(f"WebSocket connection established for room {room.name}")
+        logger.info(f"WebSocket connection established for room {room_name}")
 
     async def disconnect(self, close_code):
         await self.channel_layer.group_discard(
-            room.name,
+            room_name,
             self.channel_name
         )
-        logger.info(f"WebSocket connection closed for room {self.room_name}")
+        logger.info(f"WebSocket connection closed for room {room_name}")
 
     async def receive(self, text_data=None, bytes_data=None):
         text_data_json = json.loads(text_data)
@@ -68,7 +68,7 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
 
         # Send the message to the room group
         await self.channel_layer.group_send(
-            self.room.name,
+            self.room_name,
             {
                 'type': 'chat_message',
                 'message': message,
