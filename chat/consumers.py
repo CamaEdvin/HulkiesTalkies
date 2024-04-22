@@ -17,7 +17,6 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         jwt_token = None
         print("self.scope['headers']: ", self.scope['headers'])
-        print("self.scope['headers']['Authorization']: ", self.scope['headers']['Authorization'])
         print("self.scope['query_string'].decode('utf-8'): ", self.scope['query_string'].decode('utf-8'))
         if room_name is None:
             logger.error("Room name not provided")
