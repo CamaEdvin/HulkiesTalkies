@@ -18,6 +18,8 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
         jwt_token = None
         print("self.scope['headers']: ", self.scope['headers'])
         print("self.scope['query_string'].decode('utf-8'): ", self.scope['query_string'].decode('utf-8'))
+        room_name = self.scope['url_route']['kwargs']['room_name']
+        print("room_name: ", room_name)
         if room_name is None:
             logger.error("Room name not provided")
             await self.close()
