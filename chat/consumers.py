@@ -32,7 +32,8 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
             logger.error("JWT token not provided in query parameters")
             await self.close()
             return
-
+        room_name = self.scope['url_route']['kwargs']['room_name']
+        print("room_name: ", room_name)
         # Your room fetching logic here
         room = await self.get_room(room_name)
         if room is None:
