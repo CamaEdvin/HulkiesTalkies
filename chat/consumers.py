@@ -15,18 +15,8 @@ logger = logging.getLogger(__name__)
 
 class PrivateChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        jwt_token = None
-        print("self.scope['headers']: ", self.scope['headers'])
-        print("self.scope['query_string'].decode('utf-8'): ", self.scope['query_string'].decode('utf-8'))
-
-        # Your authentication logic here, if needed
-        # Example: check for a query parameter in the URL
-        jwt_token = self.scope['query_string'].decode('utf-8')
-        print("jwt_token: ", jwt_token)
-        if not jwt_token:
-            logger.error("JWT token not provided in query parameters")
-            await self.close()
-            return
+        self.username = "Anonymous"
+        self.accept()
         room_name = self.scope['url_route']['kwargs']['room_name']
         print("room_name: ", room_name)
 
