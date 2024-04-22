@@ -18,11 +18,6 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
         jwt_token = None
         print("self.scope['headers']: ", self.scope['headers'])
         print("self.scope['query_string'].decode('utf-8'): ", self.scope['query_string'].decode('utf-8'))
-        room = await self.get_room(room_name)
-        if room is None:
-            logger.error(f"Room '{room_name}' not found")
-            await self.close()
-            return
 
         # Your authentication logic here, if needed
         # Example: check for a query parameter in the URL
@@ -34,6 +29,7 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
             return
         room_name = self.scope['url_route']['kwargs']['room_name']
         print("room_name: ", room_name)
+        
         # Your room fetching logic here
         room = await self.get_room(room_name)
         if room is None:
