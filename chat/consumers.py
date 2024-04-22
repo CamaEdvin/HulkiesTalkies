@@ -29,7 +29,7 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
             return
         room_name = self.scope['url_route']['kwargs']['room_name']
         print("room_name: ", room_name)
-        
+
         # Your room fetching logic here
         room = await self.get_room(room_name)
         if room is None:
@@ -58,8 +58,12 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
 
     async def receive(self, text_data=None, bytes_data=None):
         text_data_json = json.loads(text_data)
+        print("text_data_json: ", text_data_json)
         message = text_data_json['message']
-        username = self.scope['user'].username  # Assuming you have authentication set up
+        print("message: ", message)
+        username = self.scope['user'].username 
+        print("username: ", username)
+        
         logger.info(f"Received message in room {self.room_name} from {username}: {message}")
 
         await self.save_message(message, username)
@@ -77,6 +81,8 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
     async def chat_message(self, event):
         message = event['message']
         username = event['username']
+        print("message: ", message)
+        print("username: ", username)
 
         # Send the message to the client
         await self.send(text_data=json.dumps({
@@ -87,18 +93,10 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
 
     async def save_message(self, message, username):
         sender = User.objects.get(username=username)
+        print("sender: ", sender)
         models.Message.objects.create(content=message, sender=sender, room=self.room)
         logger.info(f"Message saved in database for room {self.room}: {message}")
 
-    def get_user_from_session(self):
-        if hasattr(self.scope['session'], '_session_cache'):
-            # For Django 3.1+
-            user_id = self.scope['session']._session_cache.get('_auth_user_id')
-        else:
-            user_id = self.scope['session'].get('_auth_user_id')
-        if user_id:
-            return User.objects.get(id=user_id)
-        return None
 
     @database_sync_to_async
     def get_room(self, room_name):
