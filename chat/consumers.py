@@ -17,45 +17,30 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         jwt_token = None
         print("self.scope['headers']: ", self.scope['headers'])
-        print("self.scope['url_route']['kwargs']['room_name']: ", self.scope['url_route']['kwargs']['room_name'])
-        if 'Authorization' in self.scope['headers']:
-            try:
-                jwt_token = self.scope['headers']['Authorization'].decode('utf-8').split()[1]
-            except IndexError:
-                logger.error("JWT token not provided")
-                await self.close()
-                return
-        else:
-            logger.error("Authorization header not found")
+        print("self.scope['headers']['Authorization']: ", self.scope['headers']['Authorization'])
+        print("self.scope['query_string'].decode('utf-8'): ", self.scope['query_string'].decode('utf-8'))
+        if room_name is None:
+            logger.error("Room name not provided")
             await self.close()
             return
 
+        # Your authentication logic here, if needed
+        # Example: check for a query parameter in the URL
+        jwt_token = self.scope['query_string'].decode('utf-8')
         print("jwt_token: ", jwt_token)
-        
-        # Authenticate the user using Simple JWT's JWTAuthentication
-        jwt_authentication = JWTAuthentication()
-        print("jwt_authentication: ", jwt_authentication)
-        try:
-            user, _ = jwt_authentication.authenticate(jwt_token)
-            # Set the authenticated user in the consumer's scope
-            self.scope['user'] = user
-        except Exception as e:
-            # Handle authentication failure
-            logger.error(f"Authentication error: {e}")
+        if not jwt_token:
+            logger.error("JWT token not provided in query parameters")
             await self.close()
             return
-        
-        room_name = self.scope['url_route']['kwargs']['room_name']
 
-        # Fetch the room object from the database
+        # Your room fetching logic here
         room = await self.get_room(room_name)
-        print("room: ", room)
         if room is None:
             logger.error(f"Room '{room_name}' not found")
             await self.close()
             return
 
-        # Add the channel to the room group
+        # Add the channel to the room group using the room's name
         await self.channel_layer.group_add(
             room.name,
             self.channel_name
@@ -63,11 +48,11 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
 
         # Accept the WebSocket connection
         await self.accept(subprotocol='websocket')
-        logger.info(f"WebSocket connection established for room {self.room.name}")
+        logger.info(f"WebSocket connection established for room {room.name}")
 
     async def disconnect(self, close_code):
         await self.channel_layer.group_discard(
-            self.room.name,
+            room.name,
             self.channel_name
         )
         logger.info(f"WebSocket connection closed for room {self.room_name}")

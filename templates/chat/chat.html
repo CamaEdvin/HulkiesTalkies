@@ -43,64 +43,67 @@
 
     <script>
        const urlParams = new URLSearchParams(window.location.search);
-       const jwtToken = urlParams.get('access_token');
-       const roomName = '{{ data.room.name }}';
-       const userId = urlParams.get('user_id');
+const jwtToken = urlParams.get('access_token');
+const roomName = '{{ data.room.name }}';  // Make sure this is properly populated
+const userId = urlParams.get('user_id');
 
-      console.log("roomName: ", roomName);
-      console.log("jwtToken: ", jwtToken);
-      console.log("userId: ", userId);
-  
-      const socket = new WebSocket(`ws://139.162.189.203:8001/ws/private/${roomName}/?access_token=${jwtToken}&user_id=${userId}`, 'json', {
-        headers: {
-            Authorization: `Bearer ${jwtToken}`
-        }
-        });
-      chatSocket.onopen = function(event) {
-          // WebSocket connection is open
-          console.log("WebSocket connection opened");
-      };
-  
-      chatSocket.onmessage = function(e) {
-        const data = JSON.parse(e.data);
-        const chatLog = document.getElementById('chat-log');
-        const messageElement = document.createElement('div');
+console.log("roomName: ", roomName);
+console.log("jwtToken: ", jwtToken);
+console.log("userId: ", userId);
 
-        const senderClass = data.sender === currentUserUsername ? 'media w-50 mb-3' : 'media w-50 ml-auto mb-3';
-        const bgClass = data.sender === currentUserUsername ? 'bg-light' : 'bg-primary';
-        const textClass = data.sender === currentUserUsername ? 'text-muted' : 'text-white';
-  
-          messageElement.innerHTML = `
-              <div class="${senderClass}">
-                  <img src="https://bootstrapious.com/i/snippets/sn-chat/avatar.svg" alt="user" width="50" class="rounded-circle">
-                  <div class="media-body ml-3">
-                      <div class="${bgClass} rounded py-2 px-3 mb-2">
-                          <p class="text-small mb-0 ${textClass}">${data.message}</p>
-                      </div>
-                      <p class="small text-muted">${data.timestamp}</p>
-                  </div>
-              </div>
-          `;
-          chatLog.appendChild(messageElement);
-      };
-  
-      chatSocket.onclose = function(e) {
-          console.error('Chat socket closed unexpectedly');
-      };
-  
-      document.querySelector('#chat-message-input').focus();
-      const chatForm = document.querySelector('#chat-form');
-      chatForm.addEventListener('submit', function(e) {
-          e.preventDefault();  // Prevent the default form submission behavior
-          const messageInputDom = document.querySelector('#chat-message-input');
-          const message = messageInputDom.value.trim();  // Trim whitespace from the message
-          if (message !== '') {  // Check if the message is not empty
-              chatSocket.send(JSON.stringify({
-                  'message': message
-              }));
-              messageInputDom.value = '';  // Clear the input field after sending
-          }
-      });
+// Create the WebSocket instance
+const socket = new WebSocket(`ws://139.162.189.203:8001/ws/private/${roomName}/?access_token=${jwtToken}&user_id=${userId}`);
+
+// Define WebSocket event handlers
+socket.onopen = function(event) {
+    console.log("WebSocket connection opened");
+};
+
+socket.onmessage = function(e) {
+    const data = JSON.parse(e.data);
+    const chatLog = document.getElementById('chat-log');
+    const messageElement = document.createElement('div');
+
+    const senderClass = data.sender === userId ? 'media w-50 mb-3' : 'media w-50 ml-auto mb-3';
+    const bgClass = data.sender === userId ? 'bg-light' : 'bg-primary';
+    const textClass = data.sender === userId ? 'text-muted' : 'text-white';
+
+    messageElement.innerHTML = `
+        <div class="${senderClass}">
+            <img src="https://bootstrapious.com/i/snippets/sn-chat/avatar.svg" alt="user" width="50" class="rounded-circle">
+            <div class="media-body ml-3">
+                <div class="${bgClass} rounded py-2 px-3 mb-2">
+                    <p class="text-small mb-0 ${textClass}">${data.message}</p>
+                </div>
+                <p class="small text-muted">${data.timestamp}</p>
+            </div>
+        </div>
+    `;
+    chatLog.appendChild(messageElement);
+};
+
+socket.onclose = function(e) {
+    console.error('Chat socket closed unexpectedly');
+};
+
+// Add event listener for sending messages
+document.querySelector('#chat-form').addEventListener('submit', function(e) {
+    e.preventDefault();  // Prevent the default form submission behavior
+    const messageInputDom = document.querySelector('#chat-message-input');
+    const message = messageInputDom.value.trim();  // Trim whitespace from the message
+    if (message !== '') {  // Check if the message is not empty
+        socket.send(JSON.stringify({
+            'message': message,
+            'sender': userId,
+            'timestamp': new Date().toISOString()
+        }));
+        messageInputDom.value = '';  // Clear the input field after sending
+    }
+});
+
+// Focus on the message input field
+document.querySelector('#chat-message-input').focus();
+
   </script>
   
   
