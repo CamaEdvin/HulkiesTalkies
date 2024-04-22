@@ -18,10 +18,9 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
         jwt_token = None
         print("self.scope['headers']: ", self.scope['headers'])
         print("self.scope['query_string'].decode('utf-8'): ", self.scope['query_string'].decode('utf-8'))
-        room_name = self.scope['url_route']['kwargs']['room_name']
-        print("room_name: ", room_name)
-        if room_name is None:
-            logger.error("Room name not provided")
+        room = await self.get_room(room_name)
+        if room is None:
+            logger.error(f"Room '{room_name}' not found")
             await self.close()
             return
 
@@ -47,16 +46,18 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
             self.channel_name
         )
 
+        self.room_name = room_name
+
         # Accept the WebSocket connection
         await self.accept(subprotocol='websocket')
         logger.info(f"WebSocket connection established for room {room_name}")
 
     async def disconnect(self, close_code):
         await self.channel_layer.group_discard(
-            room_name,
+            self.room_name,
             self.channel_name
         )
-        logger.info(f"WebSocket connection closed for room {room_name}")
+        logger.info(f"WebSocket connection closed for room {self.room_name}")
 
     async def receive(self, text_data=None, bytes_data=None):
         text_data_json = json.loads(text_data)
@@ -104,6 +105,7 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
 
     @database_sync_to_async
     def get_room(self, room_name):
+        print("room_name: ", room_name)
         try:
             return models.Room.objects.get(name=room_name)
         except models.Room.DoesNotExist:
