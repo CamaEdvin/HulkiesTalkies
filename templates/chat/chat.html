@@ -52,7 +52,7 @@ console.log("jwtToken: ", jwtToken);
 console.log("userId: ", userId);
 
 // Create the WebSocket instance
-const socket = new WebSocket(`ws://139.162.189.203:8001/ws/private/${roomName}/?access_token=${jwtToken}&user_id=${userId}`);
+const socket = new WebSocket(`http://139.162.189.203:8001/ws/private/${roomName}/?access_token=${jwtToken}&user_id=${userId}`);
 
 // Define WebSocket event handlers
 socket.onopen = function(event) {
