@@ -33,8 +33,28 @@ ALLOWED_HOSTS = ['*']
 
 
 SESSION_COOKIE_NAME = 'sessionId'
+SESSION_COOKIE_DOMAIN = '139.162.189.203'
 SESSION_SAVE_EVERY_REQUEST = True
 
+CORS_ALLOWED_ORIGINS = [
+    'http://139.162.189.203:8000',
+    'http://139.162.189.203:8001',
+]
+
+CORS_ALLOW_METHODS = [
+    'GET',
+    'POST',
+    'PUT',
+    'PATCH',
+    'DELETE',
+    'OPTIONS',
+]
+
+CORS_ALLOW_HEADERS = [
+    'Accept',
+    'Content-Type',
+    'Authorization',
+]
 # Application definition
 
 INSTALLED_APPS = [
@@ -48,6 +68,7 @@ INSTALLED_APPS = [
     'channels',
     'channels_redis',
     'rest_framework',
+    'corsheaders',
     'chat',
 ]
 
@@ -62,6 +83,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'HalkiesTalkies.urls'
