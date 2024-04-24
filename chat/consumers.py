@@ -26,9 +26,9 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         # Get the session key from the query string or headers
         headers = dict(self.scope['headers'])
-        session = dict(self.scope['session'])
+        sessionid = dict(self.scope['sessionid'])
         print("headers: ", headers)
-        print("session: ", session)
+        print("sessionid: ", sessionid)
         if b'sessionid' in headers:
             session_key = headers[b'sessionid'].decode().split(';')[0].split('=')[1]
             print("session_key: ", session_key)
