@@ -39,6 +39,10 @@ SESSION_SAVE_EVERY_REQUEST = True
 CORS_ALLOWED_ORIGINS = [
     'http://139.162.189.203:8000',
     'http://139.162.189.203:8001',
+    'http://127.0.0.1:8000',
+    'http://127.0.0.1:8001',
+    'http://0.0.0.0:8000',
+    'http://0.0.0.0:8001',
 ]
 
 CORS_ALLOW_METHODS = [
@@ -59,6 +63,7 @@ CORS_ALLOW_HEADERS = [
 
 INSTALLED_APPS = [
     'daphne',
+    'corsheaders',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -68,7 +73,6 @@ INSTALLED_APPS = [
     'channels',
     'channels_redis',
     'rest_framework',
-    'corsheaders',
     'chat',
 ]
 

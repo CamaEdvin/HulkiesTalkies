@@ -54,23 +54,23 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
             await self.close()
             return
 
-        if self.room_type == 'private':
-            await self.channel_layer.group_add(
-                f"private_{self.room_name}",
-                self.channel_name
-            )
-        elif self.room_type == 'group':
-            await self.channel_layer.group_add(
-                f"group_{self.room_name}",
-                self.channel_name
-            )
-        else:
-            logger.error(f"Invalid room type: {self.room_type}")
-            await self.close()
-            return
+                if self.room_type == 'private':
+                    await self.channel_layer.group_add(
+                        f"private_{self.room_name}",
+                        self.channel_name
+                    )
+                elif self.room_type == 'group':
+                    await self.channel_layer.group_add(
+                        f"group_{self.room_name}",
+                        self.channel_name
+                    )
+                else:
+                    logger.error(f"Invalid room type: {self.room_type}")
+                    await self.close()
+                    return
 
-        await self.accept(subprotocol='websocket')
-        logger.info(f"WebSocket connection established for room {self.room_name} ({self.room_type})")
+                await self.accept(subprotocol='websocket')
+                logger.info(f"WebSocket connection established for room {self.room_name} ({self.room_type})")
 
     @database_sync_to_async
     def get_session(self, scope):
