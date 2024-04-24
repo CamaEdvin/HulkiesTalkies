@@ -19,8 +19,8 @@ services:
     container_name: chat_redis
     volumes:
       - ./data/redis:/data
-    expose:
-      - 6379
+    ports:
+      - "6379:6379"
     command:
       - 'redis-server'
 
