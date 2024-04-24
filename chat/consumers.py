@@ -56,12 +56,6 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
         await self.accept(subprotocol='websocket')
         logger.info(f"WebSocket connection established for room {self.room_name} ({self.room_type})")
 
-    @database_sync_to_async
-    def get_session(self, scope):
-        # Retrieve the session middleware from the ASGI scope
-        for middleware in scope["middleware"]:
-            if isinstance(middleware, SessionMiddleware):
-                return middleware.Session(scope)
 
     @database_sync_to_async
     def get_user(self, user_id):
@@ -75,7 +69,7 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
             self.room_name,
             self.channel_name
         )
-        logger.info(f"WebSocket connection closed for room {self.name}")
+        logger.info(f"WebSocket connection closed for room {self.room_name}")
 
 
     async def receive(self, text_data=None, bytes_data=None):
@@ -86,7 +80,7 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
         username = self.scope['user'].username 
         print("username: ", username)
         
-        logger.info(f"Received message in room {self.name} from {username}: {message}")
+        logger.info(f"Received message in room {self.room_name} from {username}: {message}")
 
         await self.save_message(message, username)
 
@@ -111,13 +105,13 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
             'message': message,
             'username': username
         }))
-        logger.info(f"Message sent to room {self.name}: {message}")
+        logger.info(f"Message sent to room {self.room_name}: {message}")
 
     async def save_message(self, message, username):
         sender = User.objects.get(username=username)
         print("sender: ", sender)
         models.Message.objects.create(content=message, sender=sender, room=self.room)
-        logger.info(f"Message saved in database for room {self.room}: {message}")
+        logger.info(f"Message saved in database for room {self.room_name}: {message}")
 
 
     @database_sync_to_async
