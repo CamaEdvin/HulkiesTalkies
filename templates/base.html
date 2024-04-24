@@ -153,9 +153,8 @@ h5 {
         document.querySelectorAll('.id').forEach(item => {
             item.addEventListener('click', event => {
                 event.preventDefault();
-                let roomName = item.getAttribute('room_name');
-                let roomType = item.getAttribute('room_type');
-                window.location.pathname = '/ws/' + roomType + '/' + roomName + '/';
+                let roomID = item.getAttribute('id');
+                window.location.href = '/room/' + roomID + '/';
             });
         });
     </script>
