@@ -26,20 +26,20 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         # Get the session key from the query string or headers
         headers = dict(self.scope['headers'])
-        print("user: ", user)
+        print("headers: ", headers)
         if b'cookie' in headers:
             session_key = headers[b'cookie'].decode().split(';')[0].split('=')[1]
-            print("user: ", user)
+            print("session_key: ", session_key)
             # Create a new session store with the session key
             self.scope['session'] = SessionStore(session_key=session_key)
             # Load the session data
             self.scope['session'].load()
             # Get the user from the session
             user_id = self.scope['session'].get('_auth_user_id')
-            print("user: ", user)
+            print("user_id: ", user_id)
             self.scope['user'] = await self.get_user(user_id)
             self.user = self.scope['user']
-            print("self.scope['user']: ", self.scope['user'])
+            print("self.user: ", self.user)
             if self.user is None:
                 await self.close()
                 return
