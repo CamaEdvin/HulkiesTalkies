@@ -10,7 +10,7 @@ from django.contrib.sessions.middleware import SessionMiddleware
 from channels.auth import AuthMiddlewareStack
 from channels.middleware import BaseMiddleware
 from django.contrib.auth.models import AnonymousUser
-
+from django.contrib.auth.middleware import AuthenticationMiddleware
 logger = logging.getLogger(__name__)
 
 
@@ -21,17 +21,27 @@ User = get_user_model()
 
 class PrivateChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        # Get the session key from the headers
-        headers = dict(self.scope['headers'])
-        print("headers: ", headers)
-        if b'cookie' in headers:
-            session_key = headers[b'cookie'].decode().split(';')[0].split('=')[1]
-            print("session_key: ", session_key)
-            # Create a fake scope with the session key and get the user
-            fake_scope = self.scope.copy()
-            fake_scope['session'] = SessionMiddleware(AuthMiddlewareStack(None)).process_request(fake_scope)
-            fake_scope['session'].session_key = session_key
-            self.scope['user'] = await self.get_user(fake_scope)
+        # Get the session key from the query string or headers
+        query_params = parse_qs(self.scope['query_string'].decode())
+        session_key = query_params.get('session_key', [None])[0]
+        print("query_params: ", query_params)
+        print("query_params: ", query_params)
+        
+        # Create a fake scope with the session key and get the user
+        fake_scope = self.scope.copy()
+        fake_scope['session'] = SessionMiddleware(AuthenticationMiddleware(None)).process_request(fake_scope)
+        fake_scope['session'].session_key = session_key
+        print("fake_scope: ", fake_scope)
+        close_old_connections()
+        print("fake_scope: ", fake_scope)
+        user = await self.get_user(fake_scope)
+        print("user: ", user)
+        if user is None:
+            await self.close()
+            return
+
+        # Assign the user to the consumer's scope
+        self.scope['user'] = user
 
         # Check if the user is authenticated
         self.user = self.scope['user']
@@ -76,16 +86,6 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
         )
         logger.info(f"WebSocket connection closed for room {self.room_name}")
 
-    async def get_user(self, scope):
-        if 'session' in scope:
-            session = scope['session']
-            user_id = session.get('_auth_user_id')
-            if user_id is not None:
-                try:
-                    return await User.objects.get(pk=user_id)
-                except User.DoesNotExist:
-                    pass
-        return AnonymousUser()
 
     async def receive(self, text_data=None, bytes_data=None):
         text_data_json = json.loads(text_data)
@@ -136,6 +136,18 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
             return models.Room.objects.get(name=room_name)
         except models.Room.DoesNotExist:
             return None
+
+    async def get_user(self, scope):
+        # Extract the session and get the user
+        session = scope['session']
+        user_id = session.get('_auth_user_id')
+        if user_id is not None:
+            try:
+                user = await self.scope['user'].__class__.objects.get(pk=user_id)
+                return user
+            except User.DoesNotExist:
+                pass
+        return AnonymousUser()
 
 """class GroupChatConsumer(mixins.ChatConsumerBase):
     def get_name(self, name):
