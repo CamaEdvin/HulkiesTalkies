@@ -32,6 +32,7 @@ DEBUG = True
 ALLOWED_HOSTS = ['*']
 
 
+SESSION_COOKIE_NAME = 'sessionid'
 
 # Application definition
 
