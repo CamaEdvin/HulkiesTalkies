@@ -24,11 +24,9 @@ User = get_user_model()
 
 class PrivateChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        # Apply SessionMiddleware to access the session in the consumer
-        #self.scope["session"] = await self.get_session(self.scope)
         headers = dict(self.scope['headers'])
         print("headers: ", headers)
-        session_id = headers.get(b'sessionId').decode()
+        session_id = headers.get('sessionId')
         print("session_id: ", session_id)
         if not self.scope["session"].session_key:
             await self.close()
