@@ -11,6 +11,7 @@ from channels.auth import AuthMiddlewareStack
 from channels.middleware import BaseMiddleware
 from django.contrib.auth.models import AnonymousUser
 from django.contrib.auth.middleware import AuthenticationMiddleware
+from urllib.parse import parse_qs
 logger = logging.getLogger(__name__)
 
 
