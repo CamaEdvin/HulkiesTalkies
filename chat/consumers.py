@@ -127,7 +127,6 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
 
     @database_sync_to_async
     def get_room(self, name):
-        print("name: ", name)
         try:
             return models.Room.objects.get(name=name)
         except models.Room.DoesNotExist:
@@ -136,6 +135,7 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
     async def get_user(self, user_id):
             if user_id:
                 user = User.objects.get(id=user_id)
+                print("user: ", user)
             return user
 
 """class GroupChatConsumer(mixins.ChatConsumerBase):
