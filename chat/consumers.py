@@ -100,7 +100,7 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
 
 
     @database_sync_to_async
-    async def get_room(self, room_name):
+    def get_room(self, room_name):
         print("room_name: ", room_name)
         try:
             return models.Room.objects.get(name=room_name)
