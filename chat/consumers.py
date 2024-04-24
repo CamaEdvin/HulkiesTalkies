@@ -24,57 +24,65 @@ User = get_user_model()
 
 class PrivateChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        # Get the session key from the query string or headers
-        headers = dict(self.scope['headers'])
-        print("headers: ", headers)
-        if 'cookie' in headers:
-            session_key = headers['cookie'].decode().split(';')[0].split('=')[1]
-            print("session_key: ", session_key)
-            # Create a new session store with the session key
-            self.scope['session'] = SessionStore(session_key=session_key)
-            print("self.scope['session']: ", self.scope['session'])
-            # Load the session data
-            await sync_to_async(self.scope['session'].load)()
-            # Get the user from the session
-            user_id = await sync_to_async(self.scope['session'].get)('_auth_user_id')
-            print("user_id: ", user_id)
-            self.scope['user'] = await self.get_user(user_id)
-            self.user = self.scope['user']
-            print("self.user: ", self.user)
-            if self.user is None:
-                await self.close()
-                return
+        # Apply SessionMiddleware to access the session in the consumer
+        self.scope["session"] = await self.get_session(self.scope)
+        session = dict(self.scope["session"])
+        print("session: ", session)
 
-            else:
-                # Connect to the room and accept the WebSocket connection
-                self.room_name  = self.scope["url_route"]["kwargs"]["room_name "]
-                self.room_type = self.scope["url_route"]["kwargs"]["room_type"]
-                print("self.name: ", self.name)
-                print("self.room_type: ", self.room_type)
-                room = self.get_room(self.name)
-                print("room: ", room)
-                if room is None:
-                    logger.error(f"Room '{self.name}' not found")
-                    await self.close()
-                    return
+        if not self.scope["session"].session_key:
+            await self.close()
+            return
 
-                if self.room_type == 'private':
-                    await self.channel_layer.group_add(
-                        f"private_{self.name}",
-                        self.channel_name
-                    )
-                elif self.room_type == 'group':
-                    await self.channel_layer.group_add(
-                        f"group_{self.name}",
-                        self.channel_name
-                    )
-                else:
-                    logger.error(f"Invalid room type: {self.room_type}")
-                    await self.close()
-                    return
+        user_id = self.scope["session"].get("_auth_user_id")
+        print("user_id: ", user_id)
+        if not user_id:
+            await self.close()
+            return
 
-                await self.accept(subprotocol='websocket')
-                logger.info(f"WebSocket connection established for room {self.name} ({self.room_type})")
+        self.user = await self.get_user(user_id)
+        print("self.user: ", self.user)
+        if not self.user:
+            await self.close()
+            return
+
+        # Continue with room setup and WebSocket connection acceptance
+        self.room_name = self.scope["url_route"]["kwargs"]["room_name"]
+        self.room_type = self.scope["url_route"]["kwargs"]["room_type"]
+        room = self.get_room(self.room_name)
+        print("room: ", room)
+        if room is None:
+            logger.error(f"Room '{self.room_name}' not found")
+            await self.close()
+            return
+
+        if self.room_type == 'private':
+            await self.channel_layer.group_add(
+                f"private_{self.room_name}",
+                self.channel_name
+            )
+        elif self.room_type == 'group':
+            await self.channel_layer.group_add(
+                f"group_{self.room_name}",
+                self.channel_name
+            )
+        else:
+            logger.error(f"Invalid room type: {self.room_type}")
+            await self.close()
+            return
+
+        await self.accept(subprotocol='websocket')
+        logger.info(f"WebSocket connection established for room {self.room_name} ({self.room_type})")
+
+    @database_sync_to_async
+    def get_session(self, scope):
+        return SessionMiddleware(scope["http_session"])
+
+    @database_sync_to_async
+    def get_user(self, user_id):
+        try:
+            return User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return None
 
     async def disconnect(self, close_code):
         await self.channel_layer.group_discard(
@@ -133,11 +141,6 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
         except models.Room.DoesNotExist:
             return None
 
-    async def get_user(self, user_id):
-            if user_id:
-                user = User.objects.get(id=user_id)
-                print("user: ", user)
-            return user
 
 """class GroupChatConsumer(mixins.ChatConsumerBase):
     def get_name(self, name):
