@@ -12,31 +12,48 @@ logger = logging.getLogger(__name__)
 
 
 
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+
 class PrivateChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        print("self.scope['headers']: ", self.scope['headers'])
-        print("self.scope['query_string'].decode('utf-8'): ", self.scope['query_string'].decode('utf-8'))
+        # Get the session key from the headers
+        headers = dict(self.scope['headers'])
+        print("headers: ", headers)
+        if b'cookie' in headers:
+            session_key = headers[b'cookie'].decode().split(';')[0].split('=')[1]
+            print("session_key: ", session_key)
+            # Create a fake scope with the session key and get the user
+            fake_scope = self.scope.copy()
+            fake_scope['session'] = SessionMiddleware(AuthMiddlewareStack(None)).process_request(fake_scope)
+            fake_scope['session'].session_key = session_key
+            self.scope['user'] = await self.get_user(fake_scope)
+
+        # Check if the user is authenticated
         self.user = self.scope['user']
         if self.user.is_anonymous:
+            print("is_anonymous")
             await self.close()
         else:
+            # Connect to the room and accept the WebSocket connection
             self.room_name = self.scope["url_route"]["kwargs"]["room_name"]
             self.room_type = self.scope["url_route"]["kwargs"]["room_type"]
-            
+            print("self.room_name: ", self.room_name)
+            print("self.room_type: ", self.room_type)
             room = self.get_room(self.room_name)
+            print("room: ", room)
             if room is None:
                 logger.error(f"Room '{self.room_name}' not found")
                 await self.close()
                 return
 
             if self.room_type == 'private':
-                # Add the channel to the private room group using the room's name
                 await self.channel_layer.group_add(
                     f"private_{self.room_name}",
                     self.channel_name
                 )
             elif self.room_type == 'group':
-                # Add the channel to the group room group using the room's name
                 await self.channel_layer.group_add(
                     f"group_{self.room_name}",
                     self.channel_name
@@ -46,7 +63,6 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
                 await self.close()
                 return
 
-            # Accept the WebSocket connection
             await self.accept(subprotocol='websocket')
             logger.info(f"WebSocket connection established for room {self.room_name} ({self.room_type})")
 
@@ -56,6 +72,17 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
             self.channel_name
         )
         logger.info(f"WebSocket connection closed for room {self.room_name}")
+
+    async def get_user(self, scope):
+        if 'session' in scope:
+            session = scope['session']
+            user_id = session.get('_auth_user_id')
+            if user_id is not None:
+                try:
+                    return await User.objects.get(pk=user_id)
+                except User.DoesNotExist:
+                    pass
+        return AnonymousUser()
 
     async def receive(self, text_data=None, bytes_data=None):
         text_data_json = json.loads(text_data)

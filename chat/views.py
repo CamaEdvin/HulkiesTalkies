@@ -10,7 +10,6 @@ from rest_framework.response import Response
 from django.http import JsonResponse
 import json
 from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated
 
 class NewRoomView(View):
     def get(self, request):
@@ -50,6 +49,7 @@ class NewRoomView(View):
 
         return render(request, 'chat/chat.html', context)
 
+@login_required
 def dashboard(request):
     users = User.objects.all()
     rooms = models.Room.objects.all()
