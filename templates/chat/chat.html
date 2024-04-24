@@ -43,10 +43,10 @@
 
     <script>
         const roomName = '{{ data.room.name }}';
-        const roomType = '{{ data.room.type }}';
+        const roomType = '{{ data.room.room_type }}';
         console.log("roomName: ", roomName);
         console.log("roomType: ", roomType);
-    
+        
         const chatSocket = new WebSocket(
             'ws://'
             + window.location.host
