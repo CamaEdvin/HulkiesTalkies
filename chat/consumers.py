@@ -97,7 +97,7 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
 
         # Send the message to the room group
         await self.channel_layer.group_send(
-            self.name,
+            self.room_name,
             {
                 'type': 'chat_message',
                 'message': message,
