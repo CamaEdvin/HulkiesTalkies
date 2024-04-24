@@ -75,7 +75,10 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
 
     @database_sync_to_async
     def get_session(self, scope):
-        return SessionMiddleware(scope["http_session"])
+        # Retrieve the session middleware from the ASGI scope
+        for middleware in scope["middleware"]:
+            if isinstance(middleware, SessionMiddleware):
+                return middleware.Session(scope)
 
     @database_sync_to_async
     def get_user(self, user_id):
