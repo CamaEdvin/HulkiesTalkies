@@ -24,25 +24,8 @@ User = get_user_model()
 
 class PrivateChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        headers = dict(self.scope['headers'])
-        print("headers: ", headers)
-        session_id = headers.get('sessionId')
-        print("session_id: ", session_id)
-        if not self.scope["session"].session_key:
-            await self.close()
-            return
-
-        user_id = self.scope["session"].get("_auth_user_id")
-        print("user_id: ", user_id)
-        if not user_id:
-            await self.close()
-            return
-
-        self.user = await self.get_user(user_id)
-        print("self.user: ", self.user)
-        if not self.user:
-            await self.close()
-            return
+        user = self.request.user
+        print("user: ", user)
 
         # Continue with room setup and WebSocket connection acceptance
         self.room_name = self.scope["url_route"]["kwargs"]["room_name"]
