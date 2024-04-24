@@ -28,7 +28,8 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
         #self.scope["session"] = await self.get_session(self.scope)
         headers = dict(self.scope['headers'])
         print("headers: ", headers)
-
+        session_id = headers.get('sessionId').decode()
+        print("session_id: ", session_id)
         if not self.scope["session"].session_key:
             await self.close()
             return
