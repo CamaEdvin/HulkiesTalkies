@@ -26,9 +26,7 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         # Get the session key from the query string or headers
         headers = dict(self.scope['headers'])
-        sessionid = dict(self.scope['sessionid'])
         print("headers: ", headers)
-        print("sessionid: ", sessionid)
         if b'sessionid' in headers:
             session_key = headers[b'sessionid'].decode().split(';')[0].split('=')[1]
             print("session_key: ", session_key)
@@ -79,7 +77,7 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
 
     async def disconnect(self, close_code):
         await self.channel_layer.group_discard(
-            self.name,
+            self.room_name,
             self.channel_name
         )
         logger.info(f"WebSocket connection closed for room {self.name}")
