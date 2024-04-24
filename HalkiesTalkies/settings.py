@@ -32,7 +32,7 @@ DEBUG = True
 ALLOWED_HOSTS = ['*']
 
 
-SESSION_COOKIE_NAME = 'sessionid'
+SESSION_COOKIE_NAME = 'cookie'
 
 # Application definition
 
