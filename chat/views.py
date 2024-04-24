@@ -56,8 +56,16 @@ def dashboard(request):
     messages = []
 
     for room in rooms:
+        print("room_type: ", room.room_type)
+        print("room_name: ", room.room_name)
+
         latest_message = models.Message.objects.filter(room=room).order_by('-timestamp').first()
-        messages.append({'room': room, 'latest_message': latest_message, 'room_type': room.room_type})
+        messages.append({
+            'room': room, 
+            'latest_message': latest_message, 
+            'room_type': room.room_type,
+            'room_name': room.name
+            })
 
 
     context = {
