@@ -93,9 +93,7 @@ h5 {
                 <div class="messages-box">
                     <div class="list-group rounded-0">
                         {% for message in messages %}
-                        <a href="javascript:void(0);" onclick="redirectToRoomDetail('{{ message.room.id }}')" class="list-group-item list-group-item-action list-group-item-light rounded-0">
-
-                        
+                        <a room_name="{{ message.room.name }}" id="{{ message.room.id }}" class="list-group-item list-group-item-action list-group-item-light rounded-0">
                                 <div class="media"><img src="https://bootstrapious.com/i/snippets/sn-chat/avatar.svg" alt="user" width="50" class="rounded-circle">
                                     <div class="media-body ml-4">
                                         <div class="d-flex align-items-center justify-content-between mb-1">
@@ -151,50 +149,16 @@ h5 {
           $('#recipients').select2();
       });
     </script>
-<script>
-    function redirectToRoomDetail(roomId) {
-    const urlParams = new URLSearchParams(window.location.search);
-    const accessToken = urlParams.get('access_token');
-    const userId = urlParams.get('user_id');
-    const roomName = urlParams.get('room_name');
-    
-    console.log("urlParams: ", urlParams);
-    console.log("accessToken: ", accessToken);
-    console.log("userId: ", userId);
-    console.log("roomName: ", roomName);
-
-    const headers = new Headers();
-    headers.append('Authorization', `Bearer ${accessToken}`);
-
-    console.log("headers: ", headers);
-
-    const requestOptions = {
-        method: 'GET',
-        headers: headers,
-        redirect: 'follow'
-    };
-
-    console.log("requestOptions: ", requestOptions);
-
-    fetch(`/chat/room/${roomId}/?access_token=${accessToken}&user_id=${userId}&room_name=${roomName}`, requestOptions)
-        .then(response => {
-            console.log("Response status: ", response.status);
-            return response.text();  // Read the response as text first
-        })
-        .then(data => {
-            console.log("Response data: ", data);
-            window.location.href = `/chat/room/${roomId}/?access_token=${accessToken}&user_id=${userId}`;
-            try {
-                const jsonData = JSON.parse(data);  // Try parsing as JSON
-                console.log("Parsed JSON data: ", jsonData);
-            } catch (error) {
-                console.error('Error parsing JSON:', error);
-            }
-        })
-        .catch(error => console.error('There was an error!', error));
-}
-
-</script>
+    <script>
+        document.querySelectorAll('.id').forEach(item => {
+            item.addEventListener('click', event => {
+                event.preventDefault();
+                let roomName = item.getAttribute('room_name');
+                let roomType = item.getAttribute('room_type');
+                window.location.pathname = '/ws/' + roomType + '/' + roomName + '/';
+            });
+        });
+    </script>
 
 
     <footer class="footer mt-auto py-3 bg-light">

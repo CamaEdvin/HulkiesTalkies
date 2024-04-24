@@ -12,52 +12,40 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+
 class PrivateChatConsumer(WebsocketConsumer):
     def connect(self):
-        self.accept()
-
-    def disconnect(self, close_code):
-        pass
-
-    def receive(self, text_data):
-        text_data_json = json.loads(text_data)
-        message = text_data_json["message"]
-
-        self.send(text_data=json.dumps({"message": message}))
-        
-"""class PrivateChatConsumer(AsyncWebsocketConsumer):
-    async def connect(self):
-        jwt_token = None
+        self.room_name = self.scope["url_route"]["kwargs"]["room_name"]
+        self.room_type = self.scope["url_route"]["kwargs"]["room_type"]
         print("self.scope['headers']: ", self.scope['headers'])
         print("self.scope['query_string'].decode('utf-8'): ", self.scope['query_string'].decode('utf-8'))
 
-        jwt_token = self.scope['query_string'].decode('utf-8')
-        print("jwt_token: ", jwt_token)
-        if not jwt_token:
-            logger.error("JWT token not provided in query parameters")
-            await self.close()
-            return
-        room_name = self.scope['url_route']['kwargs']['room_name']
-        print("room_name: ", room_name)
-
-        # Your room fetching logic here
-        room = await self.get_room(room_name)
+        room = await self.get_room(self.room_name)
         if room is None:
-            logger.error(f"Room '{room_name}' not found")
+            logger.error(f"Room '{self.room_name}' not found")
             await self.close()
             return
 
-        # Add the channel to the room group using the room's name
-        await self.channel_layer.group_add(
-            room_name,
-            self.channel_name
-        )
-
-        self.room_name = room_name
+        if self.room_type == 'private':
+            # Add the channel to the private room group using the room's name
+            await self.channel_layer.group_add(
+                f"private_{self.room_name}",
+                self.channel_name
+            )
+        elif self.room_type == 'group':
+            # Add the channel to the group room group using the room's name
+            await self.channel_layer.group_add(
+                f"group_{self.room_name}",
+                self.channel_name
+            )
+        else:
+            logger.error(f"Invalid room type: {self.room_type}")
+            await self.close()
+            return
 
         # Accept the WebSocket connection
         await self.accept(subprotocol='websocket')
-        logger.info(f"WebSocket connection established for room {room_name}")
+        logger.info(f"WebSocket connection established for room {self.room_name} ({self.room_type})")
 
     async def disconnect(self, close_code):
         await self.channel_layer.group_discard(
@@ -114,7 +102,7 @@ class PrivateChatConsumer(WebsocketConsumer):
         try:
             return models.Room.objects.get(name=room_name)
         except models.Room.DoesNotExist:
-            return None"""
+            return None
 
 """class GroupChatConsumer(mixins.ChatConsumerBase):
     def get_name(self, name):
