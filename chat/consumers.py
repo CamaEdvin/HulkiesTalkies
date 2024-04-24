@@ -46,7 +46,7 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
 
             else:
                 # Connect to the room and accept the WebSocket connection
-                self.name = self.scope["url_route"]["kwargs"]["name"]
+                self.room_name  = self.scope["url_route"]["kwargs"]["room_name "]
                 self.room_type = self.scope["url_route"]["kwargs"]["room_type"]
                 print("self.name: ", self.name)
                 print("self.room_type: ", self.room_type)
