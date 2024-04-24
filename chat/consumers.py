@@ -46,25 +46,25 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
 
             else:
                 # Connect to the room and accept the WebSocket connection
-                self.room_name = self.scope["url_route"]["kwargs"]["room_name"]
+                self.name = self.scope["url_route"]["kwargs"]["name"]
                 self.room_type = self.scope["url_route"]["kwargs"]["room_type"]
-                print("self.room_name: ", self.room_name)
+                print("self.name: ", self.name)
                 print("self.room_type: ", self.room_type)
-                room = self.get_room(self.room_name)
+                room = self.get_room(self.name)
                 print("room: ", room)
                 if room is None:
-                    logger.error(f"Room '{self.room_name}' not found")
+                    logger.error(f"Room '{self.name}' not found")
                     await self.close()
                     return
 
                 if self.room_type == 'private':
                     await self.channel_layer.group_add(
-                        f"private_{self.room_name}",
+                        f"private_{self.name}",
                         self.channel_name
                     )
                 elif self.room_type == 'group':
                     await self.channel_layer.group_add(
-                        f"group_{self.room_name}",
+                        f"group_{self.name}",
                         self.channel_name
                     )
                 else:
@@ -73,14 +73,14 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
                     return
 
                 await self.accept(subprotocol='websocket')
-                logger.info(f"WebSocket connection established for room {self.room_name} ({self.room_type})")
+                logger.info(f"WebSocket connection established for room {self.name} ({self.room_type})")
 
     async def disconnect(self, close_code):
         await self.channel_layer.group_discard(
-            self.room_name,
+            self.name,
             self.channel_name
         )
-        logger.info(f"WebSocket connection closed for room {self.room_name}")
+        logger.info(f"WebSocket connection closed for room {self.name}")
 
 
     async def receive(self, text_data=None, bytes_data=None):
@@ -91,13 +91,13 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
         username = self.scope['user'].username 
         print("username: ", username)
         
-        logger.info(f"Received message in room {self.room_name} from {username}: {message}")
+        logger.info(f"Received message in room {self.name} from {username}: {message}")
 
         await self.save_message(message, username)
 
         # Send the message to the room group
         await self.channel_layer.group_send(
-            self.room_name,
+            self.name,
             {
                 'type': 'chat_message',
                 'message': message,
@@ -116,7 +116,7 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
             'message': message,
             'username': username
         }))
-        logger.info(f"Message sent to room {self.room_name}: {message}")
+        logger.info(f"Message sent to room {self.name}: {message}")
 
     async def save_message(self, message, username):
         sender = User.objects.get(username=username)
@@ -126,10 +126,10 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
 
 
     @database_sync_to_async
-    def get_room(self, room_name):
-        print("room_name: ", room_name)
+    def get_room(self, name):
+        print("name: ", name)
         try:
-            return models.Room.objects.get(name=room_name)
+            return models.Room.objects.get(name=name)
         except models.Room.DoesNotExist:
             return None
 
