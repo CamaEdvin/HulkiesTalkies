@@ -27,11 +27,12 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
         # Get the session key from the query string or headers
         headers = dict(self.scope['headers'])
         print("headers: ", headers)
-        if b'cookie' in headers:
-            session_key = headers[b'cookie'].decode().split(';')[0].split('=')[1]
+        if 'cookie' in headers:
+            session_key = headers['cookie'].decode().split(';')[0].split('=')[1]
             print("session_key: ", session_key)
             # Create a new session store with the session key
             self.scope['session'] = SessionStore(session_key=session_key)
+            print("self.scope['session']: ", self.scope['session'])
             # Load the session data
             await sync_to_async(self.scope['session'].load)()
             # Get the user from the session
