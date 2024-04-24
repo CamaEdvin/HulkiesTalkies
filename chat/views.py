@@ -57,7 +57,7 @@ def dashboard(request):
 
     for room in rooms:
         print("room_type: ", room.room_type)
-        print("room_name: ", room.room_name)
+        print("room_name: ", room.name)
 
         latest_message = models.Message.objects.filter(room=room).order_by('-timestamp').first()
         messages.append({
