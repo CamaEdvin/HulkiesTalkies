@@ -24,12 +24,13 @@ User = get_user_model()
 
 class PrivateChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        user = self.request.user
-        print("user: ", user)
+        
 
         # Continue with room setup and WebSocket connection acceptance
         self.room_name = self.scope["url_route"]["kwargs"]["room_name"]
+        print("self.room_name: ", self.room_name)
         self.room_type = self.scope["url_route"]["kwargs"]["room_type"]
+        print("self.room_type: ", self.room_type)
         room = self.get_room(self.room_name)
         print("room: ", room)
         if room is None:
