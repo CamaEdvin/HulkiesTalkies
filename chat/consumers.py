@@ -12,8 +12,20 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+class PrivateChatConsumer(WebsocketConsumer):
+    def connect(self):
+        self.accept()
 
-class PrivateChatConsumer(AsyncWebsocketConsumer):
+    def disconnect(self, close_code):
+        pass
+
+    def receive(self, text_data):
+        text_data_json = json.loads(text_data)
+        message = text_data_json["message"]
+
+        self.send(text_data=json.dumps({"message": message}))
+        
+"""class PrivateChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         jwt_token = None
         print("self.scope['headers']: ", self.scope['headers'])
@@ -102,7 +114,7 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
         try:
             return models.Room.objects.get(name=room_name)
         except models.Room.DoesNotExist:
-            return None
+            return None"""
 
 """class GroupChatConsumer(mixins.ChatConsumerBase):
     def get_name(self, name):
