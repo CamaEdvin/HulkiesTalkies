@@ -5,56 +5,59 @@ from chat import models
 from channels.db import database_sync_to_async
 from django.contrib.auth.models import User
 from asgiref.sync import sync_to_async
-from rest_framework_simplejwt.authentication import JWTAuthentication
-
+from channels.generic.websocket import AsyncWebsocketConsumer
 import logging
 
 logger = logging.getLogger(__name__)
 
 
 
-class PrivateChatConsumer(WebsocketConsumer):
-    def connect(self):
-        self.room_name = self.scope["url_route"]["kwargs"]["room_name"]
-        self.room_type = self.scope["url_route"]["kwargs"]["room_type"]
+class PrivateChatConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
         print("self.scope['headers']: ", self.scope['headers'])
         print("self.scope['query_string'].decode('utf-8'): ", self.scope['query_string'].decode('utf-8'))
-
-        room = self.get_room(self.room_name)
-        if room is None:
-            logger.error(f"Room '{self.room_name}' not found")
-            self.close()
-            return
-
-        if self.room_type == 'private':
-            # Add the channel to the private room group using the room's name
-            self.channel_layer.group_add(
-                f"private_{self.room_name}",
-                self.channel_name
-            )
-        elif self.room_type == 'group':
-            # Add the channel to the group room group using the room's name
-            self.channel_layer.group_add(
-                f"group_{self.room_name}",
-                self.channel_name
-            )
+        self.user = self.scope['user']
+        if self.user.is_anonymous:
+            await self.close()
         else:
-            logger.error(f"Invalid room type: {self.room_type}")
-            self.close()
-            return
+            self.room_name = self.scope["url_route"]["kwargs"]["room_name"]
+            self.room_type = self.scope["url_route"]["kwargs"]["room_type"]
+            
+            room = self.get_room(self.room_name)
+            if room is None:
+                logger.error(f"Room '{self.room_name}' not found")
+                await self.close()
+                return
 
-        # Accept the WebSocket connection
-        self.accept(subprotocol='websocket')
-        logger.info(f"WebSocket connection established for room {self.room_name} ({self.room_type})")
+            if self.room_type == 'private':
+                # Add the channel to the private room group using the room's name
+                await self.channel_layer.group_add(
+                    f"private_{self.room_name}",
+                    self.channel_name
+                )
+            elif self.room_type == 'group':
+                # Add the channel to the group room group using the room's name
+                await self.channel_layer.group_add(
+                    f"group_{self.room_name}",
+                    self.channel_name
+                )
+            else:
+                logger.error(f"Invalid room type: {self.room_type}")
+                await self.close()
+                return
 
-    def disconnect(self, close_code):
-        self.channel_layer.group_discard(
+            # Accept the WebSocket connection
+            await self.accept(subprotocol='websocket')
+            logger.info(f"WebSocket connection established for room {self.room_name} ({self.room_type})")
+
+    async def disconnect(self, close_code):
+        await self.channel_layer.group_discard(
             self.room_name,
             self.channel_name
         )
         logger.info(f"WebSocket connection closed for room {self.room_name}")
 
-    def receive(self, text_data=None, bytes_data=None):
+    async def receive(self, text_data=None, bytes_data=None):
         text_data_json = json.loads(text_data)
         print("text_data_json: ", text_data_json)
         message = text_data_json['message']
@@ -64,10 +67,10 @@ class PrivateChatConsumer(WebsocketConsumer):
         
         logger.info(f"Received message in room {self.room_name} from {username}: {message}")
 
-        self.save_message(message, username)
+        await self.save_message(message, username)
 
         # Send the message to the room group
-        self.channel_layer.group_send(
+        await self.channel_layer.group_send(
             self.room_name,
             {
                 'type': 'chat_message',
@@ -76,20 +79,20 @@ class PrivateChatConsumer(WebsocketConsumer):
             }
         )
 
-    def chat_message(self, event):
+    async def chat_message(self, event):
         message = event['message']
         username = event['username']
         print("message: ", message)
         print("username: ", username)
 
         # Send the message to the client
-        self.send(text_data=json.dumps({
+        await self.send(text_data=json.dumps({
             'message': message,
             'username': username
         }))
         logger.info(f"Message sent to room {self.room_name}: {message}")
 
-    def save_message(self, message, username):
+    async def save_message(self, message, username):
         sender = User.objects.get(username=username)
         print("sender: ", sender)
         models.Message.objects.create(content=message, sender=sender, room=self.room)
@@ -97,7 +100,7 @@ class PrivateChatConsumer(WebsocketConsumer):
 
 
     @database_sync_to_async
-    def get_room(self, room_name):
+    async def get_room(self, room_name):
         print("room_name: ", room_name)
         try:
             return models.Room.objects.get(name=room_name)

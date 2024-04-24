@@ -69,6 +69,7 @@ def dashboard(request):
 
 
     context = {
+        'user_r': request.user, 
         'users': users,
         'messages': messages
         }
