@@ -33,9 +33,9 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
             # Create a new session store with the session key
             self.scope['session'] = SessionStore(session_key=session_key)
             # Load the session data
-            self.scope['session'].load()
+            await sync_to_async(self.scope['session'].load)()
             # Get the user from the session
-            user_id = self.scope['session'].get('_auth_user_id')
+            user_id = await sync_to_async(self.scope['session'].get)('_auth_user_id')
             print("user_id: ", user_id)
             self.scope['user'] = await self.get_user(user_id)
             self.user = self.scope['user']
