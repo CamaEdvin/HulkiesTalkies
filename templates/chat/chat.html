@@ -49,13 +49,15 @@
         
         const chatSocket = new WebSocket(
             'ws://'
-            + window.location.host
+            + window.location.hostname
+            + ':8001'
             + '/ws/chat/'
             + roomType
             + '/'
             + roomName
             + '/'
         );
+
     
         chatSocket.onmessage = function(e) {
             const data = JSON.parse(e.data);
