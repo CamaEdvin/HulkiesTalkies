@@ -120,7 +120,7 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [("redis", 6379)],
+            "hosts": [("chat_redis", 6379)],
         },
     },
 }
@@ -139,7 +139,6 @@ DATABASES = {
     }
 }
 
-REDIS_HOST = "redis"
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
