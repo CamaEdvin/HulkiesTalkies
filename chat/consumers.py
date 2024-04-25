@@ -14,6 +14,7 @@ from django.contrib.auth.middleware import AuthenticationMiddleware
 from urllib.parse import parse_qs
 from django.contrib.sessions.backends.db import SessionStore
 from django.conf import settings
+from channels.auth import login
 logger = logging.getLogger(__name__)
 
 
@@ -148,7 +149,7 @@ class TestConsumer(AsyncWebsocketConsumer):
     async def disconnect(self, close_code):
         logger.info("WebSocket connection closed.")
 
-    async def receive(self, text_data=None, bytes_data=None):
+    async def receive(self, text_data):
         try:
             if text_data:
                 logger.info(f"Received message: {text_data}")
