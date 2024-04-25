@@ -40,7 +40,9 @@
             </div>
         </form>
     </div>
-
+    <script type="module">
+        import reconnectingWebsocket from 'https://cdn.jsdelivr.net/npm/reconnecting-websocket@4.4.0/+esm'
+    </script>
     <script>
         const roomName = '{{ data.room.name }}';
         const roomType = '{{ data.room.room_type }}';
