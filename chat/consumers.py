@@ -24,8 +24,8 @@ User = get_user_model()
 
 class PrivateChatConsumer(WebsocketConsumer):
     def connect(self):
-        
-
+        self.username = "Anonymous"
+        self.accept(subprotocol='websocket')
         # Continue with room setup and WebSocket connection acceptance
         self.room_name = self.scope["url_route"]["kwargs"]["room_name"]
         print("self.room_name: ", self.room_name)
@@ -53,7 +53,7 @@ class PrivateChatConsumer(WebsocketConsumer):
             self.close()
             return
 
-        self.accept(subprotocol='websocket')
+        
         logger.info(f"WebSocket connection established for room {self.room_name} ({self.room_type})")
 
 
@@ -119,7 +119,9 @@ class PrivateChatConsumer(WebsocketConsumer):
     def get_room(self, name):
         print("get_room")
         try:
-            return models.Room.objects.get(name=name)
+            room = models.Room.objects.get(name=name)
+            print("room: ", room)
+            return room
         except models.Room.DoesNotExist:
             return None
 
