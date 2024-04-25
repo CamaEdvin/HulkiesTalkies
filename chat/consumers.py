@@ -33,14 +33,20 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
         print("self.room_type: ", self.room_type)
         self.room_group_name = "chat_%s" % self.room_name
         print("self.room_group_name: ", self.room_group_name)
-        room = models.Room.objects.get(name=self.room_name)
+        room = self.get_room(self.room_name)
         print("room: ", room)
+        if room is None:
+            logger.error(f"Room '{self.room_name}' not found")
+            await self.close()
+            return
 
         if self.room_type == 'private':
+            print("private")
             await self.channel_layer.group_add(
                 f"private_{self.room_name}",
                 self.channel_name
             )
+            print("self.channel_layer: ", self.channel_layer)
         elif self.room_type == 'group':
             await self.channel_layer.group_add(
                 f"group_{self.room_name}",
