@@ -31,12 +31,12 @@ class PrivateChatConsumer(WebsocketConsumer):
         print("self.room_name: ", self.room_name)
         self.room_type = self.scope["url_route"]["kwargs"]["room_type"]
         print("self.room_type: ", self.room_type)
-        room = self.get_room(self.room_name)
+        """room = self.get_room(self.room_name)
         print("room: ", room)
         if room is None:
             logger.error(f"Room '{self.room_name}' not found")
             self.close()
-            return
+            return"""
 
         if self.room_type == 'private':
             self.channel_layer.group_add(
