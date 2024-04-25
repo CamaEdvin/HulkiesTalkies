@@ -23,7 +23,7 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 class PrivateChatConsumer(AsyncWebsocketConsumer):
-    def connect(self):
+    async def connect(self):
         
 
         # Continue with room setup and WebSocket connection acceptance
