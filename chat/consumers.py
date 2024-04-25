@@ -36,7 +36,7 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
         print("self.room_group_name: ", self.room_group_name)
         room = self.get_room(self.room_name)
         print("room: ", room)
-        if room is None:
+        """if room is None:
             logger.error(f"Room '{self.room_name}' not found")
             await self.close()
             return
@@ -56,7 +56,9 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
         else:
             logger.error(f"Invalid room type: {self.room_type}")
             await self.close()
-            return
+            return"""
+
+        await self.channel_layer.group_add(self.room_group_name, self.channel_name)
 
         await self.accept(subprotocol='websocket')
         logger.info(f"WebSocket connection established for room {self.room_name} ({self.room_type})")
