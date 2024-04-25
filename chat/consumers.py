@@ -25,7 +25,8 @@ User = get_user_model()
 class PrivateChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         
-
+        headers = dict(self.scope['headers'])
+        print("headers: ", headers)
         # Continue with room setup and WebSocket connection acceptance
         self.room_name = self.scope["url_route"]["kwargs"]["room_name"]
         print("self.room_name: ", self.room_name)
