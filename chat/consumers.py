@@ -99,9 +99,8 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
         
         logger.info(f"Received message in room {self.room_name} from {username}: {message}")
 
-        await self.save_message(message, username)"""
-
-        # Send the message to the room group
+        await self.save_message(message, username)
+         # Send the message to the room group
         await self.channel_layer.group_send(
             self.room_name,
             {
@@ -110,6 +109,9 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
                 'username': username
             }
         )
+        """
+
+       
 
     async def chat_message(self, event):
         message = event['message']
