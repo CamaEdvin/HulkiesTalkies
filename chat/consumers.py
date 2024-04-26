@@ -25,45 +25,34 @@ User = get_user_model()
 
 class PrivateChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        
-
-        self.user = self.scope["user"]
-        print("self.user: ", self.user)
-        # Continue with room setup and WebSocket connection acceptance
-        self.room_name = self.scope["url_route"]["kwargs"]["room_name"]
-        print("self.room_name: ", self.room_name)
-        self.room_type = self.scope["url_route"]["kwargs"]["room_type"]
-        print("self.room_type: ", self.room_type)
-        self.room_group_name = "chat_%s" % self.room_name
-        print("self.room_group_name: ", self.room_group_name)
-        room = self.get_room(self.room_name)
-        print("room: ", room)
-        """if room is None:
-            logger.error(f"Room '{self.room_name}' not found")
-            await self.close()
-            return
-
-        if self.room_type == 'private':
-            print("private")
-            await self.channel_layer.group_add(
-                f"private_{self.room_name}",
-                self.channel_name
-            )
+        if self.scope["user"].is_authenticated:
+            self.user = self.scope["user"]
+            print("self.user: ", self.user)
+            await self.channel_layer.group_add(self.room_group_name, self.channel_name)
+            await self.accept(subprotocol='websocket')
             print("self.channel_layer: ", self.channel_layer)
-        elif self.room_type == 'group':
-            await self.channel_layer.group_add(
-                f"group_{self.room_name}",
-                self.channel_name
-            )
+            logger.info(f"WebSocket connection established for room {self.room_name} ({self.room_type})")
         else:
-            logger.error(f"Invalid room type: {self.room_type}")
-            await self.close()
-            return"""
-
-        await self.channel_layer.group_add(self.room_group_name, self.channel_name)
-
-        await self.accept(subprotocol='websocket')
-        logger.info(f"WebSocket connection established for room {self.room_name} ({self.room_type})")
+            # Perform login using the session ID if available
+            session_key = self.scope.get("session", {}).session_key
+            print("session_key: ", session_key)
+            if session_key:
+                session = SessionStore(session_key=session_key)
+                print("session: ", session)
+                user_id = session.get('_auth_user_id')
+                print("user_id: ", user_id)
+                if user_id:
+                    user = await self.get_user(user_id)
+                    print("user: ", user)
+                    if user:
+                        await database_sync_to_async(login)(self.scope, user)
+                        await self.channel_layer.group_add(self.room_group_name, self.channel_name)
+                        await self.accept(subprotocol='websocket')
+                        logger.info(f"WebSocket connection established for room {self.room_name} ({self.room_type})")
+                else:
+                    await self.close()
+            else:
+                await self.close()
 
 
     @database_sync_to_async
