@@ -82,7 +82,8 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
         logger.info(f"WebSocket connection closed for room {self.room_name}")
 
     async def receive(self, text_data):
-
+        print("receive: ", receive)
+        print("self.scope: ", self.scope)
         await login(self.scope, user)
         # save the session (if the session backend does not access the db you can use `sync_to_async`)
         await database_sync_to_async(self.scope["session"].save)()
