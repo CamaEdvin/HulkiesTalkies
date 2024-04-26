@@ -26,6 +26,10 @@ User = get_user_model()
 class PrivateChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         if self.scope["user"].is_authenticated:
+            headers = dict(self.scope['headers'])
+            print("headers: ", headers)
+            scope = self.scope
+            print("scope: ", scope)
             self.user = self.scope["user"]
             print("self.user: ", self.user)
             self.room_name = self.scope["url_route"]["kwargs"]["room_name"]
@@ -55,6 +59,7 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
                     if user:
                         await database_sync_to_async(login)(self.scope, user)
                         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
+                        print("self.channel_layer: ", self.channel_layer)
                         await self.accept(subprotocol='websocket')
                         logger.info(f"WebSocket connection established for room {self.room_name} ({self.room_type})")
                 else:
@@ -68,7 +73,9 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def get_user(self, user_id):
         try:
-            return User.objects.get(id=user_id)
+            user = User.objects.get(id=user_id)
+            print("get_user: ", user)
+            return user
         except User.DoesNotExist:
             return None
 
@@ -78,6 +85,7 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
             self.room_name,
             self.channel_name
         )
+        print("self.channel_layer: ", self.channel_layer)
         logger.info(f"WebSocket connection closed for room {self.room_name}")
 
     async def receive(self, text_data):
