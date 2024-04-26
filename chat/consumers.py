@@ -28,6 +28,8 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
         
         headers = dict(self.scope['headers'])
         print("headers: ", headers)
+        self.user = self.scope["user"]
+        print("headers: ", headers)
         # Continue with room setup and WebSocket connection acceptance
         self.room_name = self.scope["url_route"]["kwargs"]["room_name"]
         print("self.room_name: ", self.room_name)
@@ -80,8 +82,14 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
         )
         logger.info(f"WebSocket connection closed for room {self.room_name}")
 
+    async def receive(self, text_data):
 
-    async def receive(self, text_data=None, bytes_data=None):
+        await login(self.scope, user)
+        # save the session (if the session backend does not access the db you can use `sync_to_async`)
+        await database_sync_to_async(self.scope["session"].save)()
+
+
+    """async def receive(self, text_data=None, bytes_data=None):
         text_data_json = json.loads(text_data)
         print("text_data_json: ", text_data_json)
         message = text_data_json['message']
@@ -91,7 +99,7 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
         
         logger.info(f"Received message in room {self.room_name} from {username}: {message}")
 
-        await self.save_message(message, username)
+        await self.save_message(message, username)"""
 
         # Send the message to the room group
         await self.channel_layer.group_send(
