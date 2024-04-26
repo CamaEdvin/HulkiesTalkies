@@ -47,7 +47,7 @@
         console.log("roomName: ", roomName);
         console.log("roomType: ", roomType);
         
-        const chatSocket = new ReconnectingWebSocket(
+        const chatSocket = new WebSocket(
             'ws://'
             + window.location.hostname
             + ':8001'
