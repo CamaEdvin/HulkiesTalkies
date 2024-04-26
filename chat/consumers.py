@@ -28,6 +28,14 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
         if self.scope["user"].is_authenticated:
             self.user = self.scope["user"]
             print("self.user: ", self.user)
+            self.room_name = self.scope["url_route"]["kwargs"]["room_name"]
+            print("self.room_name: ", self.room_name)
+            self.room_type = self.scope["url_route"]["kwargs"]["room_type"]
+            print("self.room_type: ", self.room_type)
+            self.room_group_name = "chat_%s" % self.room_name
+            print("self.room_group_name: ", self.room_group_name)
+            room = self.get_room(self.room_name)
+            print("room: ", room)
             await self.channel_layer.group_add(self.room_group_name, self.channel_name)
             await self.accept(subprotocol='websocket')
             print("self.channel_layer: ", self.channel_layer)
@@ -50,8 +58,10 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
                         await self.accept(subprotocol='websocket')
                         logger.info(f"WebSocket connection established for room {self.room_name} ({self.room_type})")
                 else:
+                    logger.error(f"WebSocket connection closed for room {self.room_name} ({self.room_type})")
                     await self.close()
             else:
+                logger.error(f"WebSocket connection closed for room {self.room_name} ({self.room_type})")
                 await self.close()
 
 
